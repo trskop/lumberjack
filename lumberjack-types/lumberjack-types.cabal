@@ -1,0 +1,59 @@
+name:                   lumberjack-types
+version:                0.1.0.0
+synopsis:               Generic data types for logging frameworks.
+-- description:            TODO
+homepage:               https://github.com/trskop/lumberjack
+license:                BSD3
+license-file:           LICENSE
+author:                 Peter Trško
+maintainer:             peter.trsko@gmail.com
+copyright:              (c) 2015, Peter Trško
+category:               Data
+build-type:             Simple
+cabal-version:          >=1.10
+
+extra-source-files:     ChangeLog.md, README.md
+
+flag pedantic
+  description:          Pass additional warning flags to GHC.
+  default:              False
+  manual:               True
+
+library
+  hs-source-dirs:      src
+  exposed-modules:
+      Data.Lumberjack.LogLevel
+--  , Data.Lumberjack.LogSource
+    , Data.Lumberjack.LogStr
+--  , Data.Lumberjack.LogFunction
+  -- other-modules:
+
+  default-language:    Haskell2010
+  other-extensions:
+      CPP
+    , DeriveDataTypeable
+    , DeriveGeneric
+    , FlexibleInstances
+    , LambdaCase
+    , NoImplicitPrelude
+    , TemplateHaskell
+    , TypeFamilies
+
+  build-depends:
+      base >=4.7 && <4.9
+    , bytestring ==0.10.*
+    , text ==1.1.*
+    , template-haskell ==2.9.*
+
+    , tagged
+    , number-length
+
+  ghc-options:
+    -Wall
+    -fwarn-tabs
+
+  if flag(pedantic)
+    ghc-options:
+      -fwarn-implicit-prelude
+      -fwarn-missing-import-lists
+--    -Werror
