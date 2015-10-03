@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -22,29 +23,40 @@ module Data.Lumberjack.LogStr
 
 import Prelude (Num((+)))
 
-import Data.Function ((.), id)
+import Data.Function ((.), ($), id)
 import Data.Int (Int, Int16, Int32, Int64, Int8)
-import Data.Monoid (Monoid(mempty, mappend))
+import Data.Monoid (Monoid(mappend, mempty))
 import Data.String (IsString(fromString), String)
 import Data.Typeable (Typeable)
+import Data.Proxy (Proxy(Proxy))
 import Data.Word (Word, Word16, Word32, Word64, Word8)
+import GHC.Generics (Generic)
 
 import qualified Data.ByteString as Strict (ByteString)
 import qualified Data.ByteString as Strict.ByteString (concat, empty, length)
 import Data.ByteString.Builder (Builder)
 import qualified Data.ByteString.Builder as Builder
     ( byteString
-    , intDec
-    , int8Dec
     , int16Dec
+    , int16HexFixed
     , int32Dec
+    , int32HexFixed
     , int64Dec
+    , int64HexFixed
+    , int8Dec
+    , int8HexFixed
+    , intDec
     , toLazyByteString
-    , wordDec
-    , word8Dec
     , word16Dec
+    , word16Hex
     , word32Dec
+    , word32Hex
     , word64Dec
+    , word64Hex
+    , word8Dec
+    , word8Hex
+    , wordDec
+    , wordHex
     )
 import qualified Data.ByteString.Lazy as Lazy (ByteString)
 import qualified Data.ByteString.Lazy as Lazy.ByteString (toChunks, toStrict)
@@ -56,14 +68,16 @@ import qualified Data.Text.Lazy as Lazy.Text (pack)
 import qualified Data.Text.Lazy.Encoding as Lazy.Text (encodeUtf8)
 
 import Data.NumberLength
-    ( NumberLength(numberLength)
+    ( BoundedNumberLength(maxNumberLengthHex)
+    , NumberLength(numberLength, numberLengthHex)
     , SignedNumberLength(signedNumberLength)
     )
+import Data.Tagged (Tagged(Tagged))
 
 
 -- | Log message builder. Use ('Data.Monoid.<>') to append two LogStr in O(1).
 data LogStr = LogStr !Int Builder
-  deriving Typeable
+  deriving (Generic, Typeable)
 
 instance Monoid LogStr where
     mempty = LogStr 0 (Builder.byteString Strict.ByteString.empty)
@@ -142,13 +156,61 @@ instance ToLogStr Word32 where
 instance ToLogStr Word64 where
     toLogStr n = LogStr (numberLength n) (Builder.word64Dec n)
 
+-- {{{ Hexadecimal ------------------------------------------------------------
+
+data Hexadecimal
+  deriving (Generic, Typeable)
+
+hex :: a -> Tagged Hexadecimal a
+hex = Tagged
+
+proxyOf :: a -> Proxy a
+proxyOf _ = Proxy
+
+{- TODO: Find elegant way how to get around not having Builder.intHexFixed
+instance ToLogStr (Tagged Hexadecimal Int) where
+    toLogStr n = LogStr (signedNumberLength n) (Builder.intDec n)
+-}
+
+instance ToLogStr (Tagged Hexadecimal Int8) where
+    toLogStr (Tagged n) =
+        LogStr (maxNumberLengthHex $ proxyOf n) $ Builder.int8HexFixed n
+
+instance ToLogStr (Tagged Hexadecimal Int16) where
+    toLogStr (Tagged n) =
+        LogStr (maxNumberLengthHex $ proxyOf n) $ Builder.int16HexFixed n
+
+instance ToLogStr (Tagged Hexadecimal Int32) where
+    toLogStr (Tagged n) =
+        LogStr (maxNumberLengthHex $ proxyOf n) $ Builder.int32HexFixed n
+
+instance ToLogStr (Tagged Hexadecimal Int64) where
+    toLogStr (Tagged n) =
+        LogStr (maxNumberLengthHex $ proxyOf n) $ Builder.int64HexFixed n
+
+instance ToLogStr (Tagged Hexadecimal Word) where
+    toLogStr (Tagged n) = LogStr (numberLengthHex n) (Builder.wordHex n)
+
+instance ToLogStr (Tagged Hexadecimal Word8) where
+    toLogStr (Tagged n) = LogStr (numberLengthHex n) (Builder.word8Hex n)
+
+instance ToLogStr (Tagged Hexadecimal Word16) where
+    toLogStr (Tagged n) = LogStr (numberLengthHex n) (Builder.word16Hex n)
+
+instance ToLogStr (Tagged Hexadecimal Word32) where
+    toLogStr (Tagged n) = LogStr (numberLengthHex n) (Builder.word32Hex n)
+
+instance ToLogStr (Tagged Hexadecimal Word64) where
+    toLogStr (Tagged n) = LogStr (numberLengthHex n) (Builder.word64Hex n)
+
+-- }}} Hexadecimal ------------------------------------------------------------
 -- }}} ToLogStr ---------------------------------------------------------------
 
 -- {{{ LogStr -----------------------------------------------------------------
 
 -- | Construct 'LogStr' from multiple pieces that have instance of 'ToLogStr'
 -- type class.
-logStr :: (LogStrArgs args) => args
+logStr :: LogStrArgs args => args
 logStr = logStrArgs mempty
 
 -- | Class describes variadic arguments of 'logStr' function.
