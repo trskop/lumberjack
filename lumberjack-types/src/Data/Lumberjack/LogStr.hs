@@ -21,12 +21,11 @@ module Data.Lumberjack.LogStr
 import Prelude (Num((+)))
 
 import Data.Function ((.), id)
-import Data.Int (Int)
+import Data.Int (Int, Int16, Int32, Int64, Int8)
 import Data.Monoid (Monoid(mempty, mappend))
-import Data.Ord (Ord((<)))
 import Data.String (IsString(fromString), String)
 import Data.Typeable (Typeable)
-import Data.Word (Word)
+import Data.Word (Word, Word16, Word32, Word64, Word8)
 
 import qualified Data.ByteString as Strict (ByteString)
 import qualified Data.ByteString as Strict.ByteString (concat, empty, length)
@@ -34,8 +33,16 @@ import Data.ByteString.Builder (Builder)
 import qualified Data.ByteString.Builder as Builder
     ( byteString
     , intDec
+    , int8Dec
+    , int16Dec
+    , int32Dec
+    , int64Dec
     , toLazyByteString
     , wordDec
+    , word8Dec
+    , word16Dec
+    , word32Dec
+    , word64Dec
     )
 import qualified Data.ByteString.Lazy as Lazy (ByteString)
 import qualified Data.ByteString.Lazy as Lazy.ByteString (toChunks, toStrict)
@@ -46,7 +53,10 @@ import qualified Data.Text.Lazy as Lazy (Text)
 import qualified Data.Text.Lazy as Lazy.Text (pack)
 import qualified Data.Text.Lazy.Encoding as Lazy.Text (encodeUtf8)
 
-import Data.NumberLength (NumberLength(numberLength))
+import Data.NumberLength
+    ( NumberLength(numberLength)
+    , SignedNumberLength(signedNumberLength)
+    )
 
 
 -- | Log message builder. Use ('Data.Monoid.<>') to append two LogStr in O(1).
@@ -101,13 +111,33 @@ instance ToLogStr Lazy.Text where
     toLogStr = toLogStr . Lazy.Text.encodeUtf8
 
 instance ToLogStr Int where
-    toLogStr n = LogStr len (Builder.intDec n)
-      where
-        len = numberLength n + (if n < 0 then 1 else 0)
-        -- Method "numberLength" returns only number of digits omitting minus
-        -- sign.
+    toLogStr n = LogStr (signedNumberLength n) (Builder.intDec n)
+
+instance ToLogStr Int8 where
+    toLogStr n = LogStr (signedNumberLength n) (Builder.int8Dec n)
+
+instance ToLogStr Int16 where
+    toLogStr n = LogStr (signedNumberLength n) (Builder.int16Dec n)
+
+instance ToLogStr Int32 where
+    toLogStr n = LogStr (signedNumberLength n) (Builder.int32Dec n)
+
+instance ToLogStr Int64 where
+    toLogStr n = LogStr (signedNumberLength n) (Builder.int64Dec n)
 
 instance ToLogStr Word where
     toLogStr n = LogStr (numberLength n) (Builder.wordDec n)
+
+instance ToLogStr Word8 where
+    toLogStr n = LogStr (numberLength n) (Builder.word8Dec n)
+
+instance ToLogStr Word16 where
+    toLogStr n = LogStr (numberLength n) (Builder.word16Dec n)
+
+instance ToLogStr Word32 where
+    toLogStr n = LogStr (numberLength n) (Builder.word32Dec n)
+
+instance ToLogStr Word64 where
+    toLogStr n = LogStr (numberLength n) (Builder.word64Dec n)
 
 -- }}} ToLogStr ---------------------------------------------------------------
