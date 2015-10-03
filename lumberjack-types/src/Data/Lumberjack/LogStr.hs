@@ -2,6 +2,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE TypeFamilies #-}
 -- |
 -- Module:       $HEADER$
 -- Description:  TODO
@@ -9,7 +10,8 @@
 -- License:      BSD3
 --
 -- Stability:    experimental
--- Portability:  CPP, FlexibleInstances, DeriveDataTypeable, NoImplicitPrelude
+-- Portability:  CPP, FlexibleInstances, DeriveDataTypeable, NoImplicitPrelude,
+--               TypeFamilies
 --
 -- Code taken, and adapted, from:
 -- <https://hackage.haskell.org/package/fast-logger fast-logger> created by
@@ -141,3 +143,28 @@ instance ToLogStr Word64 where
     toLogStr n = LogStr (numberLength n) (Builder.word64Dec n)
 
 -- }}} ToLogStr ---------------------------------------------------------------
+
+-- {{{ LogStr -----------------------------------------------------------------
+
+-- | Construct 'LogStr' from multiple pieces that have instance of 'ToLogStr'
+-- type class.
+logStr :: (LogStrArgs args) => args
+logStr = foldLogStrArgs mempty
+
+-- | Class describes variadic arguments of 'logStr' function.
+class LogStrArgs a where
+    type Result a
+
+    logStrArgs :: LogStr -> a
+
+instance LogStrArgs LogStr where
+    type Result LogStr = LogStr
+
+    logStrArgs = id
+
+instance (ToLogStr a, LogStrArgs r) => LogStrArgs (a -> r) where
+    type Result (a -> r) = r
+
+    logStrArgs str a = logStrArgs (str `mappend` toLogStr a)
+
+-- }}} LogStr -----------------------------------------------------------------
