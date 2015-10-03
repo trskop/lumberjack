@@ -149,7 +149,7 @@ instance ToLogStr Word64 where
 -- | Construct 'LogStr' from multiple pieces that have instance of 'ToLogStr'
 -- type class.
 logStr :: (LogStrArgs args) => args
-logStr = foldLogStrArgs mempty
+logStr = logStrArgs mempty
 
 -- | Class describes variadic arguments of 'logStr' function.
 class LogStrArgs a where
