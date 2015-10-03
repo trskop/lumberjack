@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 -- |
 -- Module:       $HEADER$
@@ -6,7 +8,7 @@
 -- License:      BSD3
 --
 -- Stability:    experimental
--- Portability:  NoImplicitPrelude
+-- Portability:  DeriveDataTypeable, NoImplicitPrelude
 --
 -- Inspired by:
 -- <https://hackage.haskell.org/package/fast-logger fast-logger> created by
@@ -15,6 +17,7 @@
 module Data.Lumberjack.Backend
   where
 
+import Data.Typeable (Typeable)
 import System.IO (IO)
 
 import Data.Lumberjack.LogStr (LogStr)
@@ -44,3 +47,24 @@ class LoggingBackend b where
     -- | Perform 'flush' and release any acquired resources. Logging backend
     -- may not be used after this step.
     close :: b -> IO ()
+
+-- | Useful in situations when monomorphic interface is desired, but without
+-- the loss of generality.
+data SomeLoggingBackend = forall b. LoggingBackend b => SomeLoggingBackend b
+  deriving (Typeable)
+
+instance LoggingBackend SomeLoggingBackend where
+    reload (SomeLoggingBackend backend) = reload backend
+    {-# INLINE reload #-}
+
+    pushLogStr (SomeLoggingBackend backend) = pushLogStr backend
+    {-# INLINE pushLogStr #-}
+
+    pushLogStrLn (SomeLoggingBackend backend) = pushLogStrLn backend
+    {-# INLINE pushLogStrLn #-}
+
+    flush (SomeLoggingBackend backend) = flush backend
+    {-# INLINE flush #-}
+
+    close (SomeLoggingBackend backend) = close backend
+    {-# INLINE close #-}
