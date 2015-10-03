@@ -74,7 +74,7 @@ defaultToLogStr = \case
     level        -> toLogStr . ByteString.pack . List.drop 5 $ show level
 
 data Default
-  deriving (Typeable)
+  deriving (Generic, Typeable)
 
 instance ToLogStr (Tagged Default LogLevel) where
     toLogStr (Tagged level) = defaultToLogStr level
