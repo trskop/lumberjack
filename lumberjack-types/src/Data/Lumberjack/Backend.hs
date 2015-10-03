@@ -8,7 +8,7 @@
 -- License:      BSD3
 --
 -- Stability:    experimental
--- Portability:  DeriveDataTypeable, NoImplicitPrelude
+-- Portability:  DeriveDataTypeable, ExistentialQuantification, NoImplicitPrelude
 --
 -- Inspired by:
 -- <https://hackage.haskell.org/package/fast-logger fast-logger> created by
