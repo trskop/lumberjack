@@ -23,7 +23,8 @@ flag pedantic
 library
   hs-source-dirs:      src
   exposed-modules:
-      System.Lumberjack.Backend
+      System.Lumberjack
+    , System.Lumberjack.Backend
 --  , System.Lumberjack.LogFunction
     , System.Lumberjack.LogLevel
 --  , System.Lumberjack.LogSource
