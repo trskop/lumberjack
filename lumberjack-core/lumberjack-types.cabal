@@ -24,10 +24,11 @@ library
   hs-source-dirs:      src
   exposed-modules:
       System.Lumberjack.Backend
+--  , System.Lumberjack.LogFunction
     , System.Lumberjack.LogLevel
 --  , System.Lumberjack.LogSource
     , System.Lumberjack.LogStr
---  , System.Lumberjack.LogFunction
+    , System.Lumberjack.PushLog
   -- other-modules:
 
   default-language:    Haskell2010
@@ -47,6 +48,7 @@ library
     , text ==1.1.*
     , template-haskell ==2.9.*
 
+    , data-default-class ==0.0.*
     , tagged
     , number-length
 
