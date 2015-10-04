@@ -35,8 +35,6 @@ import Data.Text (Text)
 import qualified Data.Text as Text (pack, unpack)
 import Language.Haskell.TH.Syntax (Lift(lift))
 
-import Data.Tagged (Tagged(Tagged))
-
 import System.Lumberjack.LogStr (LogStr, ToLogStr(toLogStr))
 
 
@@ -73,11 +71,8 @@ defaultToLogStr = \case
     LevelOther t -> toLogStr t
     level        -> toLogStr . ByteString.pack . List.drop 5 $ show level
 
-data Default
-  deriving (Generic, Typeable)
-
-instance ToLogStr (Tagged Default LogLevel) where
-    toLogStr (Tagged level) = defaultToLogStr level
+instance ToLogStr LogLevel where
+    toLogStr = defaultToLogStr
 
 instance Lift LogLevel where
     lift = \case
