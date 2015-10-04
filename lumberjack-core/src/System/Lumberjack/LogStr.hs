@@ -75,7 +75,8 @@ import Data.NumberLength
 import Data.Tagged (Tagged(Tagged))
 
 
--- | Log message builder. Use ('Data.Monoid.<>') to append two LogStr in O(1).
+-- | Log message builder. Monoid operations (including concatenation) are in
+-- O(1) and so is 'logStrLength'.
 data LogStr = LogStr !Int Builder
   deriving (Generic, Typeable)
 
@@ -91,7 +92,7 @@ instance IsString LogStr where
 logStrLength :: LogStr -> Int
 logStrLength (LogStr n _) = n
 
--- -- | Converting 'LogStr' to 'ByteString'.
+-- | Convert 'LogStr' to strict 'ByteString'.
 fromLogStr :: LogStr -> Strict.ByteString
 fromLogStr (LogStr _ builder) = fromBuilder builder
   where
@@ -161,6 +162,7 @@ instance ToLogStr Word64 where
 data Hexadecimal
   deriving (Generic, Typeable)
 
+-- | Mark value as 'Hexadecimal' when converting it to 'LogStr'.
 hex :: a -> Tagged Hexadecimal a
 hex = Tagged
 
