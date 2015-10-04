@@ -18,7 +18,7 @@
 -- <https://hackage.haskell.org/package/fast-logger fast-logger> created by
 -- Kazu Yamamoto \<kazu@iij.ad.jp\> under
 -- <https://github.com/kazu-yamamoto/logger/blob/master/fast-logger/LICENSE BSD3 license>.
-module Data.Lumberjack.LogStr
+module System.Lumberjack.LogStr
   where
 
 import Prelude (Num((+)))

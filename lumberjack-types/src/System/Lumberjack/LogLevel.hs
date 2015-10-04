@@ -18,7 +18,7 @@
 -- <https://hackage.haskell.org/package/monad-logger monad-logger> created by
 --  Michael Snoyman \<michael@snoyman.com\> under
 -- <https://github.com/kazu-yamamoto/logger/blob/master/monad-logger/LICENSE MIT license>.
-module Data.Lumberjack.LogLevel
+module System.Lumberjack.LogLevel
   where
 
 import Data.Data (Data, Typeable)
@@ -37,7 +37,7 @@ import Language.Haskell.TH.Syntax (Lift(lift))
 
 import Data.Tagged (Tagged(Tagged))
 
-import Data.Lumberjack.LogStr (LogStr, ToLogStr(toLogStr))
+import System.Lumberjack.LogStr (LogStr, ToLogStr(toLogStr))
 
 
 -- | Log message priority, based on @syslog(3)@ from

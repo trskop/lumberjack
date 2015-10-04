@@ -14,13 +14,13 @@
 -- <https://hackage.haskell.org/package/fast-logger fast-logger> created by
 -- Kazu Yamamoto \<kazu@iij.ad.jp\> under
 -- <https://github.com/kazu-yamamoto/logger/blob/master/fast-logger/LICENSE BSD3 license>.
-module Data.Lumberjack.Backend
+module System.Lumberjack.Backend
   where
 
 import Data.Typeable (Typeable)
 import System.IO (IO)
 
-import Data.Lumberjack.LogStr (LogStr)
+import System.Lumberjack.LogStr (LogStr)
 
 
 -- | Describes operations that can be performed on logging backend except its
