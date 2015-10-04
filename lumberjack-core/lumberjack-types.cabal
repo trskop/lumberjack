@@ -1,6 +1,7 @@
-name:                   lumberjack-types
+name:                   lumberjack-core
 version:                0.1.0.0
-synopsis:               Generic data types for logging frameworks.
+synopsis:
+  Generic, extensible and easy to use API for logging frameworks.
 -- description:            TODO
 homepage:               https://github.com/trskop/lumberjack
 license:                BSD3

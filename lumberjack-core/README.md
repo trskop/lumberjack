@@ -8,7 +8,7 @@
 
 # Description
 
-TODO
+Generic, extensible and easy to use API for logging frameworks.
 
 
 [Haskell.org]:
