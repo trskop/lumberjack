@@ -19,6 +19,17 @@
 -- Kazu Yamamoto \<kazu@iij.ad.jp\> under
 -- <https://github.com/kazu-yamamoto/logger/blob/master/fast-logger/LICENSE BSD3 license>.
 module System.Lumberjack.LogStr
+    ( LogStr(..)
+    , fromLogStr
+    , logStrLength
+
+    , ToLogStr(..)
+    , Hexadecimal
+    , hex
+
+    , LogStrArgs(..)
+    , logStr
+    )
   where
 
 import Prelude (Num((+)))
@@ -33,7 +44,13 @@ import Data.Word (Word, Word16, Word32, Word64, Word8)
 import GHC.Generics (Generic)
 
 import qualified Data.ByteString as Strict (ByteString)
-import qualified Data.ByteString as Strict.ByteString (concat, empty, length)
+import qualified Data.ByteString as Strict.ByteString
+    ( empty
+    , length
+#if !MIN_VERSION_bytestring(0,10,0)
+    , concat
+#endif
+    )
 import Data.ByteString.Builder (Builder)
 import qualified Data.ByteString.Builder as Builder
     ( byteString
@@ -59,7 +76,12 @@ import qualified Data.ByteString.Builder as Builder
     , wordHex
     )
 import qualified Data.ByteString.Lazy as Lazy (ByteString)
-import qualified Data.ByteString.Lazy as Lazy.ByteString (toChunks, toStrict)
+import qualified Data.ByteString.Lazy as Lazy.ByteString
+#if MIN_VERSION_bytestring(0,10,0)
+    (toStrict)
+#else
+    (toChunks)
+#endif
 import qualified Data.Text as Strict (Text)
 --import qualified Data.Text as Strict.Text (pack)
 import qualified Data.Text.Encoding as Strict.Text (encodeUtf8)
@@ -97,11 +119,13 @@ fromLogStr :: LogStr -> Strict.ByteString
 fromLogStr (LogStr _ builder) = fromBuilder builder
   where
     fromBuilder = toStrictByteString . Builder.toLazyByteString
-    toStrictByteString =
+
+toStrictByteString :: Lazy.ByteString -> Strict.ByteString
+toStrictByteString =
 #if MIN_VERSION_bytestring(0,10,0)
-        Lazy.ByteString.toStrict
+    Lazy.ByteString.toStrict
 #else
-        Strict.ByteString.concat . Lazy.ByteString.toChunks
+    Strict.ByteString.concat . Lazy.ByteString.toChunks
 #endif
 
 -- {{{ ToLogStr ---------------------------------------------------------------
@@ -116,7 +140,7 @@ instance ToLogStr Strict.ByteString where
     toLogStr bs = LogStr (Strict.ByteString.length bs) (Builder.byteString bs)
 
 instance ToLogStr Lazy.ByteString where
-    toLogStr = toLogStr . Strict.ByteString.concat . Lazy.ByteString.toChunks
+    toLogStr = toLogStr . toStrictByteString
 
 instance ToLogStr String where
     toLogStr = toLogStr . Lazy.Text.pack
