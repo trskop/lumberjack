@@ -21,6 +21,7 @@ import Control.Monad (Monad((>>), return))
 import Data.Function ((.), ($), const, flip)
 import Data.Typeable (Typeable)
 import Data.Monoid (Monoid(mappend, mempty))
+import Data.Proxy (Proxy(Proxy))
 import GHC.Generics (Generic)
 import System.IO (IO)
 
@@ -52,6 +53,22 @@ runPushLog :: LoggingBackend b => b -> PushLog b t -> IO ()
 runPushLog backend (PushLog f) = f backend
 {-# INLINE runPushLog #-}
 
+-- | Variant of 'runPushLog' where type variable @t@ in @'PushLog' b t@ can is
+-- restricted by type proxy. Implemented as:
+--
+-- @
+-- 'runPushLogTaggedWith' :: 'Proxy' t -> b -> 'PushLog' b t -> IO ()
+-- 'runPushLogTaggedWith' 'Proxy' = 'runPushLog'
+-- @
+runPushLogTaggedWith
+    :: LoggingBackend b
+    => Proxy t
+    -> b
+    -> PushLog b t
+    -> IO ()
+runPushLogTaggedWith Proxy = runPushLog
+{-# INLINE runPushLogTaggedWith #-}
+
 -- | Smart constructor for 'PushLog'.
 mkPushLog
     :: LoggingBackend b
@@ -64,19 +81,25 @@ mkPushLog push = PushLog . flip push
 data Str
   deriving (Generic, Typeable)
 
+str :: Proxy Str
+str = Proxy
+
 data Line
   deriving (Generic, Typeable)
+
+line :: Proxy Line
+line = Proxy
 
 -- | Run 'PushLog' using provided logging backend without appending new line at
 -- the end of the log message.
 pushLog :: LoggingBackend b => b -> PushLog b Str -> IO ()
-pushLog = runPushLog
+pushLog = runPushLogTaggedWith str
 {-# INLINE pushLog #-}
 
 -- | Run 'PushLog' using provided logging backend with new line appended to the
 -- end of the log message.
 pushLogLn :: LoggingBackend b => b -> PushLog b Line -> IO ()
-pushLogLn = runPushLog
+pushLogLn = runPushLogTaggedWith line
 {-# INLINE pushLogLn #-}
 
 instance LoggingBackend b => LogStrArgs (PushLog b Str) where
