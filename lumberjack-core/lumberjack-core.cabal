@@ -24,7 +24,7 @@ flag pedantic
   manual:               True
 
 library
-  hs-source-dirs:      src
+  hs-source-dirs:       src
   exposed-modules:
       System.Lumberjack
     , System.Lumberjack.Backend
@@ -35,7 +35,7 @@ library
     , System.Lumberjack.PushLog
   -- other-modules:
 
-  default-language:    Haskell2010
+  default-language:     Haskell2010
   other-extensions:
       CPP
     , DeriveDataTypeable
