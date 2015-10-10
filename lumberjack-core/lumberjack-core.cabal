@@ -13,7 +13,10 @@ category:               System, Logging
 build-type:             Simple
 cabal-version:          >=1.10
 
-extra-source-files:     ChangeLog.md, README.md
+extra-source-files:
+    ChangeLog.md
+  , LICENSE.fast-logger
+  , README.md
 
 flag pedantic
   description:          Pass additional warning flags to GHC.
