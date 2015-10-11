@@ -21,7 +21,9 @@
 module System.Lumberjack.LogStr
     ( LogStr(..)
     , fromLogStr
-    , logStrLength
+    , empty
+    , length
+    , null
 
     , ToLogStr(..)
     , Hexadecimal
@@ -34,6 +36,8 @@ module System.Lumberjack.LogStr
 
 import Prelude (Num((+)))
 
+import Data.Bool (Bool)
+import Data.Eq (Eq((==)))
 import Data.Function ((.), ($), id)
 import Data.Int (Int, Int16, Int32, Int64, Int8)
 import Data.Monoid (Monoid(mappend, mempty))
@@ -98,12 +102,13 @@ import Data.Tagged (Tagged(Tagged))
 
 
 -- | Log message builder. Monoid operations (including concatenation) are in
--- O(1) and so is 'logStrLength'.
+-- O(1) and so is 'length'.
 data LogStr = LogStr !Int Builder
   deriving (Generic, Typeable)
 
+-- | @'mempty' = 'empty'@
 instance Monoid LogStr where
-    mempty = LogStr 0 (Builder.byteString Strict.ByteString.empty)
+    mempty = empty
 
     LogStr s1 b1 `mappend` LogStr s2 b2 = LogStr (s1 + s2) (b1 `mappend` b2)
 
@@ -111,8 +116,21 @@ instance IsString LogStr where
     fromString = toLogStr . Lazy.Text.pack
 
 -- | Obtaining the length of 'LogStr' in O(1).
-logStrLength :: LogStr -> Int
-logStrLength (LogStr n _) = n
+length :: LogStr -> Int
+length (LogStr n _) = n
+
+-- | Check if 'LogStr' is empty (has zero length) in O(1).
+--
+-- @
+-- forall str. 'null' str = True <=> 'length' str = 0 <=> str = 'empty'
+-- @
+null :: LogStr -> Bool
+null = (== 0) . length
+
+-- | Empty 'LogStr', i.e. string with zero length. It is useful in cases when
+-- polymorphic 'def' or 'mempty' can not be used without type annotation.
+empty :: LogStr
+empty = LogStr 0 (Builder.byteString Strict.ByteString.empty)
 
 -- | Convert 'LogStr' to strict 'ByteString'.
 fromLogStr :: LogStr -> Strict.ByteString
@@ -237,7 +255,7 @@ instance ToLogStr (Tagged Hexadecimal Word64) where
 -- | Construct a log message from multiple pieces that have instance of
 -- 'ToLogStr' type class.
 log :: LogArgs args => args
-log = logArgs mempty
+log = logArgs empty
 
 -- | Class describes variadic arguments of 'log' function.
 class LogArgs a where
