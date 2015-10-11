@@ -174,6 +174,8 @@ instance ToLogStr Strict.Text where
 instance ToLogStr Lazy.Text where
     toLogStr = toLogStr . Lazy.Text.encodeUtf8
 
+-- {{{ Instances for Int* and Word* types -------------------------------------
+
 instance ToLogStr Int where
     toLogStr n = LogStr (signedNumberLength n) (Builder.intDec n)
 
@@ -203,6 +205,8 @@ instance ToLogStr Word32 where
 
 instance ToLogStr Word64 where
     toLogStr n = LogStr (numberLength n) (Builder.word64Dec n)
+
+-- }}} Instances for Int* and Word* types -------------------------------------
 
 -- {{{ Hexadecimal ------------------------------------------------------------
 
