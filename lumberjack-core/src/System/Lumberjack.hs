@@ -44,6 +44,9 @@ module System.Lumberjack
     , LogArgs(Result, logArgs)
     , log
 
+    -- * Location
+    , Location
+
     -- * Logging Levels
     , LogLevel(..)
 
@@ -67,6 +70,7 @@ import System.Lumberjack.Backend
         )
     , SomeLoggingBackend(SomeLoggingBackend)
     )
+import System.Lumberjack.Location (Location)
 import System.Lumberjack.LogLevel
     ( LogLevel
         ( LevelAlert

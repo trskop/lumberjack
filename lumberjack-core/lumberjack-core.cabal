@@ -28,6 +28,7 @@ library
   exposed-modules:
       System.Lumberjack
     , System.Lumberjack.Backend
+    , System.Lumberjack.Location
 --  , System.Lumberjack.LogFunction
     , System.Lumberjack.LogLevel
 --  , System.Lumberjack.LogSource
@@ -53,6 +54,8 @@ library
     , template-haskell ==2.9.* || ==2.10.*
 
     , data-default-class ==0.0.*
+    , between >=0.10.0.0
+    -- ^ This package uses strict API which was introduced in version 0.10.0.0.
     , tagged
     , number-length
 
