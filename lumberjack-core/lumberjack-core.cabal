@@ -18,6 +18,21 @@ extra-source-files:
   , LICENSE.fast-logger
   , README.md
 
+flag with-exceptions
+  description:
+    Provide instances for MonadThrow, MonadCatch and MonadMask type classes
+    which are defined in exceptions package.
+
+  default:              True
+  manual:               False
+
+flag with-mtl
+  description:
+    Provide instances for type classes defined in mtl package.
+
+  default:              True
+  manual:               False
+
 flag pedantic
   description:          Pass additional warning flags to GHC.
   default:              False
@@ -26,7 +41,10 @@ flag pedantic
 library
   hs-source-dirs:       src
   exposed-modules:
-      System.Lumberjack
+      Control.Monad.Logger
+    , Control.Monad.Logger.Class
+    , Control.Monad.Logger.Internal
+    , System.Lumberjack
     , System.Lumberjack.Backend
     , System.Lumberjack.Location
 --  , System.Lumberjack.LogFunction
@@ -52,12 +70,29 @@ library
     , bytestring ==0.10.*
     , text ==1.1.* || ==1.2.*
     , template-haskell ==2.9.* || ==2.10.*
+    , transformers >=0.2 && <0.5
+    -- ^ Version 0.2 was the first that introduced Control.Monad.IO.Class and
+    -- Control.Monad.Trans.Class modules.
 
     , data-default-class ==0.0.*
     , between >=0.10.0.0
     -- ^ This package uses strict API which was introduced in version 0.10.0.0.
     , tagged
     , number-length
+
+  if flag(with-exceptions)
+    build-depends:      exceptions >=0.1 && <0.9
+    -- ^ Version 0.9 may be too restrictive, since type class API of exceptions
+    -- package look to be stable.
+    cpp-options:        -DWITH_exceptions
+
+  if flag(with-mtl)
+    build-depends:      mtl >=2.0.0.0 && <3
+    -- ^ Version 2.0.0.0 is the first one that depends on transformers package.
+    cpp-options:        -DWITH_mtl
+
+  if impl(ghc >=7.10)
+    cpp-options:        -DAPPLICATIVE_MONAD
 
   ghc-options:
     -Wall
