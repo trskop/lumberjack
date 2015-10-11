@@ -39,10 +39,10 @@ module System.Lumberjack
     --
     -- | Usage example:
     --
-    -- >>> fromLogStr $ logStr "Important variable: " (123 :: Int)
+    -- >>> fromLogStr $ log "Important variable: " (123 :: Int)
     -- "Important variable: 123"
-    , LogStrArgs(Result, logStrArgs)
-    , logStr
+    , LogArgs(Result, logArgs)
+    , log
 
     -- * Logging Levels
     , LogLevel(..)
@@ -82,11 +82,11 @@ import System.Lumberjack.LogLevel
      )
 import System.Lumberjack.LogStr
     ( LogStr
-    , LogStrArgs(Result, logStrArgs)
+    , LogArgs(Result, logArgs)
     , ToLogStr(toLogStr)
     , fromLogStr
     , hex
-    , logStr
+    , log
     , logStrLength
     )
 import System.Lumberjack.PushLog

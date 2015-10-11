@@ -27,8 +27,8 @@ module System.Lumberjack.LogStr
     , Hexadecimal
     , hex
 
-    , LogStrArgs(..)
-    , logStr
+    , LogArgs(..)
+    , log
     )
   where
 
@@ -234,25 +234,25 @@ instance ToLogStr (Tagged Hexadecimal Word64) where
 
 -- {{{ LogStr -----------------------------------------------------------------
 
--- | Construct 'LogStr' from multiple pieces that have instance of 'ToLogStr'
--- type class.
-logStr :: LogStrArgs args => args
-logStr = logStrArgs mempty
+-- | Construct a log message from multiple pieces that have instance of
+-- 'ToLogStr' type class.
+log :: LogArgs args => args
+log = logArgs mempty
 
--- | Class describes variadic arguments of 'logStr' function.
-class LogStrArgs a where
+-- | Class describes variadic arguments of 'log' function.
+class LogArgs a where
     type Result a
 
-    logStrArgs :: LogStr -> a
+    logArgs :: LogStr -> a
 
-instance LogStrArgs LogStr where
+instance LogArgs LogStr where
     type Result LogStr = LogStr
 
-    logStrArgs = id
+    logArgs = id
 
-instance (ToLogStr a, LogStrArgs r) => LogStrArgs (a -> r) where
+instance (ToLogStr a, LogArgs r) => LogArgs (a -> r) where
     type Result (a -> r) = r
 
-    logStrArgs str a = logStrArgs (str `mappend` toLogStr a)
+    logArgs str a = logArgs (str `mappend` toLogStr a)
 
 -- }}} LogStr -----------------------------------------------------------------
