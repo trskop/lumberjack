@@ -19,16 +19,27 @@
 -- Kazu Yamamoto \<kazu@iij.ad.jp\> under
 -- <https://github.com/kazu-yamamoto/logger/blob/master/fast-logger/LICENSE BSD3 license>.
 module System.Lumberjack.LogStr
-    ( LogStr(..)
+    (
+    -- * LogStr Data Type
+      LogStr(..)
     , fromLogStr
     , empty
     , length
     , null
 
+    -- * Conversion To LogStr
+
     , ToLogStr(..)
+
+    -- ** Hexadecimal Representation
     , Hexadecimal
     , hex
 
+    -- ** Conversion Using Show Instances
+    , Showed
+    , showed
+
+    -- * Generic Logging Function
     , LogArgs(..)
     , log
     )
@@ -46,6 +57,7 @@ import Data.Typeable (Typeable)
 import Data.Proxy (Proxy(Proxy))
 import Data.Word (Word, Word16, Word32, Word64, Word8)
 import GHC.Generics (Generic)
+import Text.Show (Show(show))
 
 import qualified Data.ByteString as Strict (ByteString)
 import qualified Data.ByteString as Strict.ByteString
@@ -257,9 +269,22 @@ instance ToLogStr (Tagged Hexadecimal Word64) where
     toLogStr (Tagged n) = LogStr (numberLengthHex n) (Builder.word64Hex n)
 
 -- }}} Hexadecimal ------------------------------------------------------------
+
+-- {{{ Showed -----------------------------------------------------------------
+
+data Showed
+  deriving (Generic, Typeable)
+
+showed :: a -> Tagged Showed a
+showed = Tagged
+
+instance Show a => ToLogStr (Tagged Showed a) where
+    toLogStr (Tagged a) = toLogStr $ show a
+
+-- }}} Showed -----------------------------------------------------------------
 -- }}} ToLogStr ---------------------------------------------------------------
 
--- {{{ LogStr -----------------------------------------------------------------
+-- {{{ Generic Logging Function -----------------------------------------------
 
 -- | Construct a log message from multiple pieces that have instance of
 -- 'ToLogStr' type class.
@@ -282,4 +307,4 @@ instance (ToLogStr a, LogArgs r) => LogArgs (a -> r) where
 
     logArgs str a = logArgs (str `mappend` toLogStr a)
 
--- }}} LogStr -----------------------------------------------------------------
+-- }}} Generic Logging Function -----------------------------------------------

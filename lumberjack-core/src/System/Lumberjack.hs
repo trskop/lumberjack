@@ -38,6 +38,9 @@ module System.Lumberjack
     -- "000000000000007b"
     , hex
 
+    -- *** Conversion Using Show Instances
+    , showed
+
     -- * Generic Logging Function
     --
     -- | Usage example:
@@ -96,6 +99,7 @@ import System.Lumberjack.LogStr
     , fromLogStr
     , hex
     , log
+    , showed
     )
 import System.Lumberjack.PushLog
     ( PushLog
