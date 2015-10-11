@@ -13,7 +13,11 @@ module System.Lumberjack
     (
     -- * Logging Backend
       LoggingBackend(..)
+
+    -- ** Existential Wrapper for Logging Backend
     , SomeLoggingBackend(..)
+    , asSomeLoggingBackend
+    , withSomeLoggingBackend
 
     -- * Log Message
     --
@@ -35,7 +39,7 @@ module System.Lumberjack
     -- "000000000000007b"
     , hex
 
-    -- ** Simplified Concatenation
+    -- * Generic Logging Function
     --
     -- | Usage example:
     --
@@ -69,6 +73,8 @@ import System.Lumberjack.Backend
         , reload
         )
     , SomeLoggingBackend(SomeLoggingBackend)
+    , asSomeLoggingBackend
+    , withSomeLoggingBackend
     )
 import System.Lumberjack.Location (Location)
 import System.Lumberjack.LogLevel

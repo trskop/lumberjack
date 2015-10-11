@@ -15,9 +15,19 @@
 -- Kazu Yamamoto \<kazu@iij.ad.jp\> under
 -- <https://github.com/kazu-yamamoto/logger/blob/master/fast-logger/LICENSE BSD3 license>.
 module System.Lumberjack.Backend
+    (
+    -- * Logging Backend Type Class
+      LoggingBackend(..)
+
+    -- * Existential Wrapper for Logging Backend
+    , SomeLoggingBackend(SomeLoggingBackend)
+    , asSomeLoggingBackend
+    , withSomeLoggingBackend
+    )
   where
 
 import Data.Typeable (Typeable)
+import Data.Function (($), flip)
 import System.IO (IO)
 
 import System.Lumberjack.LogStr (LogStr)
@@ -68,3 +78,13 @@ instance LoggingBackend SomeLoggingBackend where
 
     close (SomeLoggingBackend backend) = close backend
     {-# INLINE close #-}
+
+withSomeLoggingBackend
+    :: LoggingBackend b => b -> (SomeLoggingBackend -> a) -> a
+withSomeLoggingBackend backend = ($ SomeLoggingBackend backend)
+{-# INLINE withSomeLoggingBackend #-}
+
+asSomeLoggingBackend
+    :: LoggingBackend b => (SomeLoggingBackend -> a) -> b -> a
+asSomeLoggingBackend = flip withSomeLoggingBackend
+{-# INLINE asSomeLoggingBackend #-}
