@@ -93,6 +93,7 @@ import qualified Data.Text.Lazy as Lazy (Text)
 import qualified Data.Text.Lazy as Lazy.Text (pack)
 import qualified Data.Text.Lazy.Encoding as Lazy.Text (encodeUtf8)
 
+import Data.Default.Class (Default(def))
 import Data.NumberLength
     ( BoundedNumberLength(maxNumberLengthHex)
     , NumberLength(numberLength, numberLengthHex)
@@ -114,6 +115,10 @@ instance Monoid LogStr where
 
 instance IsString LogStr where
     fromString = toLogStr . Lazy.Text.pack
+
+-- | @'def' = 'empty'@
+instance Default LogStr where
+    def = empty
 
 -- | Obtaining the length of 'LogStr' in O(1).
 length :: LogStr -> Int
