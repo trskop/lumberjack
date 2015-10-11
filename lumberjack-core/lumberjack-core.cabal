@@ -75,6 +75,9 @@ library
     -- Control.Monad.Trans.Class modules.
 
     , data-default-class ==0.0.*
+    , base16-bytestring >=0.1.1.0 && <0.2
+    -- ^ Version 0.1.1.0 is the first that introduced module
+    -- "Data.ByteString.Base16.Lazy".
     , between >=0.10.0.0
     -- ^ This package uses strict API which was introduced in version 0.10.0.0.
     , tagged

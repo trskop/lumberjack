@@ -105,6 +105,8 @@ import qualified Data.Text.Lazy as Lazy (Text)
 import qualified Data.Text.Lazy as Lazy.Text (pack)
 import qualified Data.Text.Lazy.Encoding as Lazy.Text (encodeUtf8)
 
+import qualified Data.ByteString.Base16 as Strict.ByteString.Base16 (encode)
+import qualified Data.ByteString.Base16.Lazy as Lazy.ByteString.Base16 (encode)
 import Data.Default.Class (Default(def))
 import Data.NumberLength
     ( BoundedNumberLength(maxNumberLengthHex)
@@ -232,6 +234,14 @@ hex = Tagged
 proxyOf :: a -> Proxy a
 proxyOf _ = Proxy
 
+instance ToLogStr (Tagged Hexadecimal Strict.ByteString) where
+    toLogStr (Tagged bs) = toLogStr $ Strict.ByteString.Base16.encode bs
+
+instance ToLogStr (Tagged Hexadecimal Lazy.ByteString) where
+    toLogStr (Tagged bs) = toLogStr $ Lazy.ByteString.Base16.encode bs
+
+-- {{{ Instances for Int* and Word* types -------------------------------------
+
 {- TODO: Find elegant way how to get around not having Builder.intHexFixed
 instance ToLogStr (Tagged Hexadecimal Int) where
     toLogStr n = LogStr (signedNumberLength n) (Builder.intDec n)
@@ -268,6 +278,7 @@ instance ToLogStr (Tagged Hexadecimal Word32) where
 instance ToLogStr (Tagged Hexadecimal Word64) where
     toLogStr (Tagged n) = LogStr (numberLengthHex n) (Builder.word64Hex n)
 
+-- }}} Instances for Int* and Word* types -------------------------------------
 -- }}} Hexadecimal ------------------------------------------------------------
 
 -- {{{ Showed -----------------------------------------------------------------
