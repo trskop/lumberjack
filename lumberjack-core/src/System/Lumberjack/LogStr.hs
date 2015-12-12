@@ -47,12 +47,13 @@ module System.Lumberjack.LogStr
 import Prelude (Num((+)))
 
 import Data.Bool (Bool)
+import Data.Data (Constr)
 import Data.Eq (Eq((==)))
 import Data.Function ((.), ($), id)
 import Data.Int (Int, Int16, Int32, Int64, Int8)
 import Data.Monoid (Monoid(mappend, mempty))
 import Data.String (IsString(fromString), String)
-import Data.Typeable (Typeable)
+import Data.Typeable (Typeable, TypeRep)
 import Data.Proxy (Proxy(Proxy))
 import Data.Word (Word, Word16, Word32, Word64, Word8)
 import GHC.Generics (Generic)
@@ -169,8 +170,19 @@ toStrictByteString =
 class ToLogStr msg where
     toLogStr :: msg -> LogStr
 
+instance ToLogStr Constr where
+    toLogStr = toLogStr . show
+
 instance ToLogStr LogStr where
     toLogStr = id
+
+instance ToLogStr String where
+    toLogStr = toLogStr . Lazy.Text.pack
+
+instance ToLogStr TypeRep where
+    toLogStr = toLogStr . show
+
+-- {{{ Instances for strict and lazy ByteString and Text ----------------------
 
 instance ToLogStr Strict.ByteString where
     toLogStr bs = LogStr (Strict.ByteString.length bs) (Builder.byteString bs)
@@ -178,14 +190,13 @@ instance ToLogStr Strict.ByteString where
 instance ToLogStr Lazy.ByteString where
     toLogStr = toLogStr . toStrictByteString
 
-instance ToLogStr String where
-    toLogStr = toLogStr . Lazy.Text.pack
-
 instance ToLogStr Strict.Text where
     toLogStr = toLogStr . Strict.Text.encodeUtf8
 
 instance ToLogStr Lazy.Text where
     toLogStr = toLogStr . Lazy.Text.encodeUtf8
+
+-- }}} Instances for strict and lazy ByteString and Text ----------------------
 
 -- {{{ Instances for Int* and Word* types -------------------------------------
 
