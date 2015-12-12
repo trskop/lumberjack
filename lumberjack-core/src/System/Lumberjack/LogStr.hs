@@ -28,7 +28,6 @@ module System.Lumberjack.LogStr
     , null
 
     -- * Conversion To LogStr
-
     , ToLogStr(..)
 
     -- ** Hexadecimal Representation
@@ -40,8 +39,8 @@ module System.Lumberjack.LogStr
     , showed
 
     -- * Generic Logging Function
-    , LogArgs(..)
-    , log
+    , LogStrArgs(..)
+    , logStr
     )
   where
 
@@ -299,23 +298,23 @@ instance Show a => ToLogStr (Tagged Showed a) where
 
 -- | Construct a log message from multiple pieces that have instance of
 -- 'ToLogStr' type class.
-log :: LogArgs args => args
-log = logArgs empty
+logStr :: LogStrArgs args => args
+logStr = logStrArgs empty
 
 -- | Class describes variadic arguments of 'log' function.
-class LogArgs a where
+class LogStrArgs a where
     type Result a
 
-    logArgs :: LogStr -> a
+    logStrArgs :: LogStr -> a
 
-instance LogArgs LogStr where
+instance LogStrArgs LogStr where
     type Result LogStr = LogStr
 
-    logArgs = id
+    logStrArgs = id
 
-instance (ToLogStr a, LogArgs r) => LogArgs (a -> r) where
+instance (ToLogStr a, LogStrArgs r) => LogStrArgs (a -> r) where
     type Result (a -> r) = r
 
-    logArgs str a = logArgs (str `mappend` toLogStr a)
+    logStrArgs str a = logStrArgs (str `mappend` toLogStr a)
 
 -- }}} Generic Logging Function -----------------------------------------------

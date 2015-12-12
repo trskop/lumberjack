@@ -49,7 +49,7 @@ import Language.Haskell.TH.Syntax (CharPos, Lift(lift), Loc(..))
 import Data.Default.Class (Default(def))
 import Data.Function.Between.Strict ((~@@^>))
 
-import System.Lumberjack.LogStr (LogStr, ToLogStr(toLogStr), log)
+import System.Lumberjack.LogStr (LogStr, ToLogStr(toLogStr), logStr)
 
 
 -- | Represents location in a Haskell source code file which is part of a
@@ -149,7 +149,7 @@ instance IsString str => Default (Location str) where
 
 -- | Serialized in to: @\<package\>:\<module\> \<file\>:\<line\>:\<char\>@.
 instance (ToLogStr str) => ToLogStr (Location str) where
-    toLogStr Location{..} = log _packageName colon _moduleName space
+    toLogStr Location{..} = logStr _packageName colon _moduleName space
         _fileName colon _startLine colon _startChar
       where
         colon = ":" :: LogStr

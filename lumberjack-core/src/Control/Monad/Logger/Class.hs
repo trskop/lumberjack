@@ -25,7 +25,7 @@ import Control.Monad.IO.Class (MonadIO)
 
 import System.Lumberjack.Backend (SomeLoggingBackend)
 import System.Lumberjack.PushLog (PushLog, line, str)
-import System.Lumberjack.LogStr (LogStr, LogArgs(logArgs))
+import System.Lumberjack.LogStr (LogStr, LogStrArgs(logStrArgs))
 
 
 -- | Instances of this type class declare that they have the ability to send
@@ -53,12 +53,12 @@ class (MonadLogger m, MonadIO m) => MonadLoggerIO m where
     askRunPushLog :: forall t. m (PushLog SomeLoggingBackend t -> IO ())
 
 -- | Version of 'runPushLog' that restricts type of type tag @t@. Useful in
--- conjunction with 'logArgs'.
+-- conjunction with 'logStrArgs'.
 --
 -- In example 'pushLogStr' is defined using 'runPushLogTaggedWith':
 --
 -- @
--- 'runPushLogTaggedWith' 'str' . 'logArgs'
+-- 'runPushLogTaggedWith' 'str' . 'logStrArgs'
 --     :: 'MonadLogger' m => 'LogStr' -> m ()
 -- @
 runPushLogTaggedWith
@@ -71,8 +71,8 @@ runPushLogTaggedWith _ = runPushLog
 
 -- | Send 'LogStr' to logging backend without any changes.
 pushLogStr :: MonadLogger m => LogStr -> m ()
-pushLogStr = runPushLogTaggedWith str . logArgs
+pushLogStr = runPushLogTaggedWith str . logStrArgs
 
 -- | Send 'LogStr' to logging backend with new line appended.
 pushLogLn :: MonadLogger m => LogStr -> m ()
-pushLogLn = runPushLogTaggedWith line . logArgs
+pushLogLn = runPushLogTaggedWith line . logStrArgs

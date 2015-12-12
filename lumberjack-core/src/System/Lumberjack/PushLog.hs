@@ -29,7 +29,7 @@ import System.IO (IO)
 import Data.Default.Class (Default(def))
 
 import System.Lumberjack.Backend (LoggingBackend(..))
-import System.Lumberjack.LogStr (LogArgs(..), LogStr)
+import System.Lumberjack.LogStr (LogStrArgs(..), LogStr)
 
 
 -- | Represents closure of a function like 'pushLogStr' or 'pushLogStrLn', with
@@ -110,14 +110,14 @@ pushLogLn :: LoggingBackend b => b -> PushLog b Line -> IO ()
 pushLogLn = runPushLogTaggedWith line
 {-# INLINE pushLogLn #-}
 
-instance LoggingBackend b => LogArgs (PushLog b Str) where
+instance LoggingBackend b => LogStrArgs (PushLog b Str) where
     type Result (PushLog b Str) = PushLog b Str
 
-    logArgs = mkPushLog pushLogStr
-    {-# INLINE logArgs #-}
+    logStrArgs = mkPushLog pushLogStr
+    {-# INLINE logStrArgs #-}
 
-instance LoggingBackend b => LogArgs (PushLog b Line) where
+instance LoggingBackend b => LogStrArgs (PushLog b Line) where
     type Result (PushLog b Line) = PushLog b Line
 
-    logArgs = mkPushLog pushLogStrLn
-    {-# INLINE logArgs #-}
+    logStrArgs = mkPushLog pushLogStrLn
+    {-# INLINE logStrArgs #-}

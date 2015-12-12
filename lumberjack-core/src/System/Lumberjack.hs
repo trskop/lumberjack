@@ -45,10 +45,10 @@ module System.Lumberjack
     --
     -- | Usage example:
     --
-    -- >>> fromLogStr $ log "Important variable: " (123 :: Int)
+    -- >>> fromLogStr $ logStr "Important variable: " (123 :: Int)
     -- "Important variable: 123"
-    , LogArgs(Result, logArgs)
-    , log
+    , LogStrArgs(Result, logStrArgs)
+    , logStr
 
     -- * Location
     , Location
@@ -94,11 +94,11 @@ import System.Lumberjack.LogLevel
      )
 import System.Lumberjack.LogStr
     ( LogStr
-    , LogArgs(Result, logArgs)
+    , LogStrArgs(Result, logStrArgs)
     , ToLogStr(toLogStr)
     , fromLogStr
     , hex
-    , log
+    , logStr
     , showed
     )
 import System.Lumberjack.PushLog
