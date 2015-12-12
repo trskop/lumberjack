@@ -37,6 +37,8 @@ module System.Lumberjack.LogStr
     -- ** Conversion Using Show Instances
     , Showed
     , showed
+    , showed1
+    , showed2
 
     -- * Generic Logging Function
     , LogStrArgs(..)
@@ -305,6 +307,12 @@ data Showed
 
 showed :: a -> Tagged Showed a
 showed = Tagged
+
+showed1 :: (a -> b) -> a -> Tagged Showed b
+showed1 = (showed .)
+
+showed2 :: (a -> b -> c) -> a -> b -> Tagged Showed c
+showed2 = (showed1 .)
 
 instance Show a => ToLogStr (Tagged Showed a) where
     toLogStr (Tagged a) = toLogStr $ show a
