@@ -2,6 +2,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeFamilies #-}
 -- |
 -- Module:       $HEADER$
@@ -11,7 +12,7 @@
 --
 -- Stability:    experimental
 -- Portability:  DeriveDataTypeable, DeriveGeneric, FlexibleInstances,
---               NoImplicitPrelude, TypeFamilies
+--               NoImplicitPrelude, RankNTypes, TypeFamilies
 --
 -- TODO
 module System.Lumberjack.PushLog
@@ -77,6 +78,13 @@ mkPushLog
     -> PushLog b t
 mkPushLog push = PushLog . flip push
 {-# INLINE mkPushLog #-}
+
+forgetPushLogTag
+    :: LoggingBackend b
+    => PushLog b t
+    -> forall t'. PushLog b t'
+forgetPushLogTag (PushLog f) = PushLog f
+{-# INLINE forgetPushLogTag #-}
 
 data Str
   deriving (Generic, Typeable)
