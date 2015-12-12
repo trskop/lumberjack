@@ -185,11 +185,11 @@ instance Monad m => Monad (LoggingT m) where
 -- {{{ MonadLogger and MonadLoggerIO instances --------------------------------
 
 instance
-#ifdef APPLICATIVE_MONAD
-    MonadIO m
-#else
-    (Applicative m, MonadIO m)
+    ( MonadIO m
+#ifndef APPLICATIVE_MONAD
+    , Applicative m
 #endif
+    )
     => MonadLogger (LoggingT m)
   where
     runPushLog pushLog = LoggingT $ \runPushLogIO ->
