@@ -124,19 +124,24 @@ data LogStr = LogStr !Int Builder
 -- | @'mempty' = 'empty'@
 instance Monoid LogStr where
     mempty = empty
+    {-# INLINE mempty #-}
 
     LogStr s1 b1 `mappend` LogStr s2 b2 = LogStr (s1 + s2) (b1 `mappend` b2)
+    {-# INLINEABLE mappend #-}
 
 instance IsString LogStr where
     fromString = toLogStr . Lazy.Text.pack
+    {-# INLINEABLE fromString #-}
 
 -- | @'def' = 'empty'@
 instance Default LogStr where
     def = empty
+    {-# INLINE def #-}
 
 -- | Obtaining the length of 'LogStr' in O(1).
 length :: LogStr -> Int
 length (LogStr n _) = n
+{-# INLINE length #-}
 
 -- | Check if 'LogStr' is empty (has zero length) in O(1).
 --
@@ -145,11 +150,13 @@ length (LogStr n _) = n
 -- @
 null :: LogStr -> Bool
 null = (== 0) . length
+{-# INLINE null #-}
 
 -- | Empty 'LogStr', i.e. string with zero length. It is useful in cases when
 -- polymorphic 'def' or 'mempty' can not be used without type annotation.
 empty :: LogStr
 empty = LogStr 0 (Builder.byteString Strict.ByteString.empty)
+{-# INLINE empty #-}
 
 -- | Convert 'LogStr' to strict 'ByteString'.
 fromLogStr :: LogStr -> Strict.ByteString
