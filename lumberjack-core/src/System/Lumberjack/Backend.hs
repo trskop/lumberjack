@@ -8,7 +8,8 @@
 -- License:      BSD3
 --
 -- Stability:    experimental
--- Portability:  DeriveDataTypeable, ExistentialQuantification, NoImplicitPrelude
+-- Portability:  DeriveDataTypeable, ExistentialQuantification,
+--               NoImplicitPrelude
 --
 -- Inspired by:
 -- <https://hackage.haskell.org/package/fast-logger fast-logger> created by
@@ -79,11 +80,14 @@ instance LoggingBackend SomeLoggingBackend where
     close (SomeLoggingBackend backend) = close backend
     {-# INLINE close #-}
 
+-- | Wrap logginb backend in to 'SomeLoggingBackend' for it to be used by
+-- monomorphic function.
 withSomeLoggingBackend
     :: LoggingBackend b => b -> (SomeLoggingBackend -> a) -> a
 withSomeLoggingBackend backend = ($ SomeLoggingBackend backend)
 {-# INLINE withSomeLoggingBackend #-}
 
+-- | Flipped version of 'withSomeLoggingBackend'.
 asSomeLoggingBackend
     :: LoggingBackend b => (SomeLoggingBackend -> a) -> b -> a
 asSomeLoggingBackend = flip withSomeLoggingBackend
