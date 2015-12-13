@@ -14,10 +14,7 @@
 -- Portability:  DeriveDataTypeable, DeriveGeneric, FlexibleInstances,
 --               LambdaCase, NoImplicitPrelude, TemplateHaskell
 --
--- Code taken, and adapted, from:
--- <https://hackage.haskell.org/package/monad-logger monad-logger> created by
---  Michael Snoyman \<michael@snoyman.com\> under
--- <https://github.com/kazu-yamamoto/logger/blob/master/monad-logger/LICENSE MIT license>.
+-- TODO
 module System.Lumberjack.LogLevel
   where
 
@@ -30,12 +27,11 @@ import GHC.Generics (Generic)
 import Text.Read (Read)
 import Text.Show (Show(show))
 
-import qualified Data.ByteString.Char8 as ByteString (pack)
 import Data.Text (Text)
 import qualified Data.Text as Text (pack, unpack)
 import Language.Haskell.TH.Syntax (Lift(lift))
 
-import System.Lumberjack.LogStr (LogStr, ToLogStr(toLogStr))
+import System.Lumberjack.LogStr (ToLogStr(toLogStr))
 
 
 -- | Log message priority, based on @syslog(3)@ from
@@ -61,18 +57,15 @@ data LogLevel
     -- ^ User defined logging level.
   deriving (Data, Eq, Generic, Ord, Read, Show, Typeable)
 
-defaultToText :: LogLevel -> Text
-defaultToText = \case
+toText :: LogLevel -> Text
+toText = \case
     LevelOther t -> t
     level        -> Text.pack . List.drop 5 $ show level
-
-defaultToLogStr :: LogLevel -> LogStr
-defaultToLogStr = \case
-    LevelOther t -> toLogStr t
-    level        -> toLogStr . ByteString.pack . List.drop 5 $ show level
+{-# INLINEABLE toText #-}
 
 instance ToLogStr LogLevel where
-    toLogStr = defaultToLogStr
+    toLogStr = toLogStr . toText
+    {-# INLINEABLE toLogStr #-}
 
 instance Lift LogLevel where
     lift = \case
