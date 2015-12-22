@@ -22,8 +22,8 @@ module System.Lumberjack
     -- * Log Message
     --
     -- | Log Messages are represented by 'LogStr' data type that behaves like
-    -- builder with O(1) length operation. This is important to provide
-    -- effective message buffering.
+    -- builder with additional O(1) length operation. This is important to
+    -- provide effective message buffering.
     , LogStr
     , fromLogStr
 
@@ -40,6 +40,8 @@ module System.Lumberjack
 
     -- *** Conversion Using Show Instances
     , showed
+    , showed1
+    , showed2
 
     -- * Generic Logging Function
     --
@@ -100,6 +102,8 @@ import System.Lumberjack.LogStr
     , hex
     , logStr
     , showed
+    , showed1
+    , showed2
     )
 import System.Lumberjack.PushLog
     ( PushLog
