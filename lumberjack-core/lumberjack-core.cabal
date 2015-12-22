@@ -2,7 +2,11 @@ name:                   lumberjack-core
 version:                0.1.0.0
 synopsis:
   Generic, extensible and easy to use API for logging frameworks.
--- description:            TODO
+description:
+  This library provides basic data types, generic API for logging backends, and
+  Monad that adds logging support by providing abstract access to logging
+  backend.
+
 homepage:               https://github.com/trskop/lumberjack
 license:                BSD3
 license-file:           LICENSE

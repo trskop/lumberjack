@@ -10,6 +10,11 @@
 
 Generic, extensible and easy to use API for logging frameworks.
 
+This library provides basic data types, generic API for logging backends, and
+Monad that adds logging support by providing abstract access to logging
+backend.
+
+
 
 [Haskell.org]:
   http://www.haskell.org
