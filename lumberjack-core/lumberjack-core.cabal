@@ -56,6 +56,7 @@ library
 --  , System.Lumberjack.LogSource
     , System.Lumberjack.LogStr
     , System.Lumberjack.LogStr.Exception
+    , System.Lumberjack.LogStr.Internal
     , System.Lumberjack.PushLog
   -- other-modules:
 

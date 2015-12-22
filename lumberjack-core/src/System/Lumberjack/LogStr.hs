@@ -21,7 +21,7 @@
 module System.Lumberjack.LogStr
     (
     -- * LogStr Data Type
-      LogStr(..)
+      LogStr
     , fromLogStr
     , empty
     , length
@@ -46,15 +46,11 @@ module System.Lumberjack.LogStr
     )
   where
 
-import Prelude (Num((+)))
-
-import Data.Bool (Bool)
 import Data.Data (Constr)
-import Data.Eq (Eq((==)))
 import Data.Function ((.), ($), id)
 import Data.Int (Int, Int16, Int32, Int64, Int8)
-import Data.Monoid (Monoid(mappend, mempty))
-import Data.String (IsString(fromString), String)
+import Data.Monoid (Monoid(mappend))
+import Data.String (String)
 import Data.Typeable (Typeable, TypeRep)
 import Data.Proxy (Proxy(Proxy))
 import Data.Word (Word, Word16, Word32, Word64, Word8)
@@ -62,17 +58,9 @@ import GHC.Generics (Generic)
 import Text.Show (Show(show))
 
 import qualified Data.ByteString as Strict (ByteString)
-import qualified Data.ByteString as Strict.ByteString
-    ( empty
-    , length
-#if !MIN_VERSION_bytestring(0,10,0)
-    , concat
-#endif
-    )
 import Data.ByteString.Builder (Builder)
 import qualified Data.ByteString.Builder as Builder
-    ( byteString
-    , int16Dec
+    ( int16Dec
     , int16HexFixed
     , int32Dec
     , int32HexFixed
@@ -81,7 +69,6 @@ import qualified Data.ByteString.Builder as Builder
     , int8Dec
     , int8HexFixed
     , intDec
-    , toLazyByteString
     , word16Dec
     , word16Hex
     , word32Dec
@@ -94,12 +81,6 @@ import qualified Data.ByteString.Builder as Builder
     , wordHex
     )
 import qualified Data.ByteString.Lazy as Lazy (ByteString)
-import qualified Data.ByteString.Lazy as Lazy.ByteString
-#if MIN_VERSION_bytestring(0,10,0)
-    (toStrict)
-#else
-    (toChunks)
-#endif
 import qualified Data.Text as Strict (Text)
 --import qualified Data.Text as Strict.Text (pack)
 import qualified Data.Text.Encoding as Strict.Text (encodeUtf8)
@@ -109,7 +90,6 @@ import qualified Data.Text.Lazy.Encoding as Lazy.Text (encodeUtf8)
 
 import qualified Data.ByteString.Base16 as Strict.ByteString.Base16 (encode)
 import qualified Data.ByteString.Base16.Lazy as Lazy.ByteString.Base16 (encode)
-import Data.Default.Class (Default(def))
 import Data.NumberLength
     ( BoundedNumberLength(maxNumberLengthHex)
     , NumberLength(numberLength, numberLengthHex)
@@ -117,66 +97,26 @@ import Data.NumberLength
     )
 import Data.Tagged (Tagged(Tagged))
 
+import System.Lumberjack.LogStr.Internal
+    ( LogStr
+    , empty
+    , fromLogStr
+    , length
+    , null
+    )
+import qualified System.Lumberjack.LogStr.Internal as Internal
+    ( LogStr(LogStr)
+    , toLogStr
+    , toLogStrWith
+    , toStrictByteString
+    )
 
--- | Log message builder. Monoid operations (including concatenation) are in
--- O(1) and so is 'length'.
-data LogStr = LogStr !Int Builder
-  deriving (Generic, Typeable)
-
--- | @'mempty' = 'empty'@
-instance Monoid LogStr where
-    mempty = empty
-    {-# INLINE mempty #-}
-
-    LogStr s1 b1 `mappend` LogStr s2 b2 = LogStr (s1 + s2) (b1 `mappend` b2)
-    {-# INLINEABLE mappend #-}
-
-instance IsString LogStr where
-    fromString = toLogStr . Lazy.Text.pack
-    {-# INLINEABLE fromString #-}
-
--- | @'def' = 'empty'@
-instance Default LogStr where
-    def = empty
-    {-# INLINE def #-}
-
--- | Obtaining the length of 'LogStr' in O(1).
-length :: LogStr -> Int
-length (LogStr n _) = n
-{-# INLINE length #-}
-
--- | Check if 'LogStr' is empty (has zero length) in O(1).
---
--- @
--- forall str. 'null' str = True <=> 'length' str = 0 <=> str = 'empty'
--- @
-null :: LogStr -> Bool
-null = (== 0) . length
-{-# INLINE null #-}
-
--- | Empty 'LogStr', i.e. string with zero length. It is useful in cases when
--- polymorphic 'def' or 'mempty' can not be used without type annotation.
-empty :: LogStr
-empty = LogStr 0 (Builder.byteString Strict.ByteString.empty)
-{-# INLINE empty #-}
-
--- | Convert 'LogStr' to strict 'ByteString'.
-fromLogStr :: LogStr -> Strict.ByteString
-fromLogStr (LogStr _ builder) = fromBuilder builder
-  where
-    fromBuilder = toStrictByteString . Builder.toLazyByteString
-
-toStrictByteString :: Lazy.ByteString -> Strict.ByteString
-toStrictByteString =
-#if MIN_VERSION_bytestring(0,10,0)
-    Lazy.ByteString.toStrict
-#else
-    Strict.ByteString.concat . Lazy.ByteString.toChunks
-#endif
 
 -- {{{ ToLogStr ---------------------------------------------------------------
 
+-- | Type class for converting values in to 'LogStr'.
 class ToLogStr msg where
+    -- | Convert a message\/value in to 'LogStr'.
     toLogStr :: msg -> LogStr
 
 instance ToLogStr Constr where
@@ -184,9 +124,11 @@ instance ToLogStr Constr where
 
 instance ToLogStr LogStr where
     toLogStr = id
+    {-# INLINE toLogStr #-}
 
 instance ToLogStr String where
     toLogStr = toLogStr . Lazy.Text.pack
+    {-# INLINEABLE toLogStr #-}
 
 instance ToLogStr TypeRep where
     toLogStr = toLogStr . show
@@ -194,50 +136,54 @@ instance ToLogStr TypeRep where
 -- {{{ Instances for strict and lazy ByteString and Text ----------------------
 
 instance ToLogStr Strict.ByteString where
-    toLogStr bs = LogStr (Strict.ByteString.length bs) (Builder.byteString bs)
+    toLogStr = Internal.toLogStr
+    {-# INLINEABLE toLogStr #-}
 
 instance ToLogStr Lazy.ByteString where
-    toLogStr = toLogStr . toStrictByteString
+    toLogStr = Internal.toLogStrWith Internal.toStrictByteString
+    {-# INLINEABLE toLogStr #-}
 
 instance ToLogStr Strict.Text where
-    toLogStr = toLogStr . Strict.Text.encodeUtf8
+    toLogStr = Internal.toLogStrWith Strict.Text.encodeUtf8
+    {-# INLINEABLE toLogStr #-}
 
 instance ToLogStr Lazy.Text where
     toLogStr = toLogStr . Lazy.Text.encodeUtf8
+    {-# INLINEABLE toLogStr #-}
 
 -- }}} Instances for strict and lazy ByteString and Text ----------------------
 
 -- {{{ Instances for Int* and Word* types -------------------------------------
 
 instance ToLogStr Int where
-    toLogStr n = LogStr (signedNumberLength n) (Builder.intDec n)
+    toLogStr = mkLogStr signedNumberLength Builder.intDec
 
 instance ToLogStr Int8 where
-    toLogStr n = LogStr (signedNumberLength n) (Builder.int8Dec n)
+    toLogStr = mkLogStr signedNumberLength Builder.int8Dec
 
 instance ToLogStr Int16 where
-    toLogStr n = LogStr (signedNumberLength n) (Builder.int16Dec n)
+    toLogStr = mkLogStr signedNumberLength Builder.int16Dec
 
 instance ToLogStr Int32 where
-    toLogStr n = LogStr (signedNumberLength n) (Builder.int32Dec n)
+    toLogStr = mkLogStr signedNumberLength Builder.int32Dec
 
 instance ToLogStr Int64 where
-    toLogStr n = LogStr (signedNumberLength n) (Builder.int64Dec n)
+    toLogStr = mkLogStr signedNumberLength Builder.int64Dec
 
 instance ToLogStr Word where
-    toLogStr n = LogStr (numberLength n) (Builder.wordDec n)
+    toLogStr = mkLogStr numberLength Builder.wordDec
 
 instance ToLogStr Word8 where
-    toLogStr n = LogStr (numberLength n) (Builder.word8Dec n)
+    toLogStr = mkLogStr numberLength Builder.word8Dec
 
 instance ToLogStr Word16 where
-    toLogStr n = LogStr (numberLength n) (Builder.word16Dec n)
+    toLogStr = mkLogStr numberLength Builder.word16Dec
 
 instance ToLogStr Word32 where
-    toLogStr n = LogStr (numberLength n) (Builder.word32Dec n)
+    toLogStr = mkLogStr numberLength Builder.word32Dec
 
 instance ToLogStr Word64 where
-    toLogStr n = LogStr (numberLength n) (Builder.word64Dec n)
+    toLogStr = mkLogStr numberLength Builder.word64Dec
 
 -- }}} Instances for Int* and Word* types -------------------------------------
 
@@ -249,9 +195,7 @@ data Hexadecimal
 -- | Mark value as 'Hexadecimal' when converting it to 'LogStr'.
 hex :: a -> Tagged Hexadecimal a
 hex = Tagged
-
-proxyOf :: a -> Proxy a
-proxyOf _ = Proxy
+{-# INLINE hex #-}
 
 instance ToLogStr (Tagged Hexadecimal Strict.ByteString) where
     toLogStr (Tagged bs) = toLogStr $ Strict.ByteString.Base16.encode bs
@@ -263,39 +207,35 @@ instance ToLogStr (Tagged Hexadecimal Lazy.ByteString) where
 
 {- TODO: Find elegant way how to get around not having Builder.intHexFixed
 instance ToLogStr (Tagged Hexadecimal Int) where
-    toLogStr n = LogStr (signedNumberLength n) (Builder.intDec n)
+    toLogStr n = Internal.LogStr (signedNumberLength n) (Builder.intDec n)
 -}
 
 instance ToLogStr (Tagged Hexadecimal Int8) where
-    toLogStr (Tagged n) =
-        LogStr (maxNumberLengthHex $ proxyOf n) $ Builder.int8HexFixed n
+    toLogStr = mkLogStrT (maxNumberLengthHex . proxyOf) Builder.int8HexFixed
 
 instance ToLogStr (Tagged Hexadecimal Int16) where
-    toLogStr (Tagged n) =
-        LogStr (maxNumberLengthHex $ proxyOf n) $ Builder.int16HexFixed n
+    toLogStr = mkLogStrT (maxNumberLengthHex . proxyOf) Builder.int16HexFixed
 
 instance ToLogStr (Tagged Hexadecimal Int32) where
-    toLogStr (Tagged n) =
-        LogStr (maxNumberLengthHex $ proxyOf n) $ Builder.int32HexFixed n
+    toLogStr = mkLogStrT (maxNumberLengthHex . proxyOf) Builder.int32HexFixed
 
 instance ToLogStr (Tagged Hexadecimal Int64) where
-    toLogStr (Tagged n) =
-        LogStr (maxNumberLengthHex $ proxyOf n) $ Builder.int64HexFixed n
+    toLogStr = mkLogStrT (maxNumberLengthHex . proxyOf) Builder.int64HexFixed
 
 instance ToLogStr (Tagged Hexadecimal Word) where
-    toLogStr (Tagged n) = LogStr (numberLengthHex n) (Builder.wordHex n)
+    toLogStr = mkLogStrT numberLengthHex Builder.wordHex
 
 instance ToLogStr (Tagged Hexadecimal Word8) where
-    toLogStr (Tagged n) = LogStr (numberLengthHex n) (Builder.word8Hex n)
+    toLogStr = mkLogStrT numberLengthHex Builder.word8Hex
 
 instance ToLogStr (Tagged Hexadecimal Word16) where
-    toLogStr (Tagged n) = LogStr (numberLengthHex n) (Builder.word16Hex n)
+    toLogStr = mkLogStrT numberLengthHex Builder.word16Hex
 
 instance ToLogStr (Tagged Hexadecimal Word32) where
-    toLogStr (Tagged n) = LogStr (numberLengthHex n) (Builder.word32Hex n)
+    toLogStr = mkLogStrT numberLengthHex Builder.word32Hex
 
 instance ToLogStr (Tagged Hexadecimal Word64) where
-    toLogStr (Tagged n) = LogStr (numberLengthHex n) (Builder.word64Hex n)
+    toLogStr = mkLogStrT numberLengthHex Builder.word64Hex
 
 -- }}} Instances for Int* and Word* types -------------------------------------
 -- }}} Hexadecimal ------------------------------------------------------------
@@ -307,15 +247,19 @@ data Showed
 
 showed :: a -> Tagged Showed a
 showed = Tagged
+{-# INLINE showed #-}
 
 showed1 :: (a -> b) -> a -> Tagged Showed b
 showed1 = (showed .)
+{-# INLINE showed1 #-}
 
 showed2 :: (a -> b -> c) -> a -> b -> Tagged Showed c
 showed2 = (showed1 .)
+{-# INLINE showed2 #-}
 
 instance Show a => ToLogStr (Tagged Showed a) where
     toLogStr (Tagged a) = toLogStr $ show a
+    {-# INLINEABLE toLogStr #-}
 
 -- }}} Showed -----------------------------------------------------------------
 -- }}} ToLogStr ---------------------------------------------------------------
@@ -326,6 +270,7 @@ instance Show a => ToLogStr (Tagged Showed a) where
 -- 'ToLogStr' type class.
 logStr :: LogStrArgs args => args
 logStr = logStrArgs empty
+{-# INLINE logStr #-}
 
 -- | Class describes variadic arguments of 'log' function.
 class LogStrArgs a where
@@ -337,10 +282,36 @@ instance LogStrArgs LogStr where
     type Result LogStr = LogStr
 
     logStrArgs = id
+    {-# INLINE logStrArgs #-}
 
 instance (ToLogStr a, LogStrArgs r) => LogStrArgs (a -> r) where
     type Result (a -> r) = r
 
     logStrArgs str a = logStrArgs (str `mappend` toLogStr a)
+    {-# INLINEABLE logStrArgs #-}
 
 -- }}} Generic Logging Function -----------------------------------------------
+
+-- {{{ Utility Functions ------------------------------------------------------
+
+mkLogStr
+    :: (a -> Int)
+    -> (a -> Builder)
+    -> a
+    -> LogStr
+mkLogStr len toBuilder a = Internal.LogStr (len a) (toBuilder a)
+{-# INLINE mkLogStr #-}
+
+mkLogStrT
+    :: (a -> Int)
+    -> (a -> Builder)
+    -> Tagged t a
+    -> LogStr
+mkLogStrT len toBuilder (Tagged a) = mkLogStr len toBuilder a
+{-# INLINE mkLogStrT #-}
+
+proxyOf :: a -> Proxy a
+proxyOf _ = Proxy
+{-# INLINE proxyOf #-}
+
+-- }}} Utility Functions ------------------------------------------------------
