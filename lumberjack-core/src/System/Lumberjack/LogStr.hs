@@ -119,6 +119,87 @@ class ToLogStr msg where
     -- | Convert a message\/value in to 'LogStr'.
     toLogStr :: msg -> LogStr
 
+instance (ToLogStr a, ToLogStr b) => ToLogStr (a, b) where
+    toLogStr (a, b) = toLogStr a `mappend` toLogStr b
+
+instance (ToLogStr a, ToLogStr b, ToLogStr c) => ToLogStr (a, b, c) where
+    toLogStr (a, b, c) = toLogStr a `mappend` toLogStr b `mappend` toLogStr c
+
+instance
+    ( ToLogStr a
+    , ToLogStr b
+    , ToLogStr c
+    , ToLogStr d
+    ) => ToLogStr (a, b, c, d)
+  where
+    toLogStr (a, b, c, d) = toLogStr a `mappend` toLogStr b `mappend` toLogStr c
+        `mappend` toLogStr d
+
+instance
+    ( ToLogStr a1
+    , ToLogStr a2
+    , ToLogStr a3
+    , ToLogStr a4
+    , ToLogStr a5
+    ) => ToLogStr (a1, a2, a3, a4, a5)
+  where
+    toLogStr (a1, a2, a3, a4, a5) =
+        toLogStr (a1, a2, a3, a4) `mappend` toLogStr a5
+
+instance
+    ( ToLogStr a1
+    , ToLogStr a2
+    , ToLogStr a3
+    , ToLogStr a4
+    , ToLogStr a5
+    , ToLogStr a6
+    ) => ToLogStr (a1, a2, a3, a4, a5, a6)
+  where
+    toLogStr (a1, a2, a3, a4, a5, a6) =
+        toLogStr (a1, a2, a3, a4, a5) `mappend` toLogStr a6
+
+instance
+    ( ToLogStr a1
+    , ToLogStr a2
+    , ToLogStr a3
+    , ToLogStr a4
+    , ToLogStr a5
+    , ToLogStr a6
+    , ToLogStr a7
+    ) => ToLogStr (a1, a2, a3, a4, a5, a6, a7)
+  where
+    toLogStr (a1, a2, a3, a4, a5, a6, a7) =
+        toLogStr (a1, a2, a3, a4, a5, a6) `mappend` toLogStr a7
+
+instance
+    ( ToLogStr a1
+    , ToLogStr a2
+    , ToLogStr a3
+    , ToLogStr a4
+    , ToLogStr a5
+    , ToLogStr a6
+    , ToLogStr a7
+    , ToLogStr a8
+    ) => ToLogStr (a1, a2, a3, a4, a5, a6, a7, a8)
+  where
+    toLogStr (a1, a2, a3, a4, a5, a6, a7, a8) =
+        toLogStr (a1, a2, a3, a4, a5, a6, a7) `mappend` toLogStr a8
+
+instance
+    ( ToLogStr a1
+    , ToLogStr a2
+    , ToLogStr a3
+    , ToLogStr a4
+    , ToLogStr a5
+    , ToLogStr a6
+    , ToLogStr a7
+    , ToLogStr a8
+    , ToLogStr a9
+    ) => ToLogStr (a1, a2, a3, a4, a5, a6, a7, a8, a9)
+  where
+    toLogStr (a1, a2, a3, a4, a5, a6, a7, a8, a9) =
+        toLogStr (a1, a2, a3, a4, a5, a6, a7, a8) `mappend` toLogStr a9
+
 instance ToLogStr Constr where
     toLogStr = toLogStr . show
 
