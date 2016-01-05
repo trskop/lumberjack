@@ -50,13 +50,38 @@ import System.Lumberjack.LogStr
 -- @
 -- {Exception \<exception-type\>: \<exception-message\>}
 -- @
-logStrException :: (Exception e, LogStrArgs args) => e -> args
-logStrException e =
+logStrException'
+    :: (Exception e, ToLogStr t, LogStrArgs args)
+    => (e -> t)
+    -- ^ Function that retrieves exception type.
+    -> e -> args
+logStrException' getExceptionType e =
     logStrArgs empty "{Exception " exceptionType ": " exceptionStr "}"
   where
-    exceptionType = showExceptionType e
+    exceptionType = getExceptionType e
     exceptionStr = showException e
         -- XXX: What if this contains new line characters?
+
+-- | Serializes exception in to a log message using following format:
+--
+-- @
+-- {Exception \<exception-type\>: \<exception-message\>}
+-- @
+--
+-- Defined as:
+--
+-- @
+-- 'logStrException' = 'logStrException'' 'showExceptionType'
+-- @
+--
+-- Examples:
+--
+-- >>> logStrException (ExitFailure 10) :: LogStr
+-- "{Exception ExitCode: ExitFailure 10}"
+-- >>> logStrException ExitSuccess :: LogStr
+-- "{Exception ExitCode: ExitSuccess}"
+logStrException :: (Exception e, LogStrArgs args) => e -> args
+logStrException = logStrException' showExceptionType
 
 -- | This uses type reflection ('Typeable') to get type information of
 -- specified exception. It also takes care of the fact that 'SomeException' and
