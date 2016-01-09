@@ -1,0 +1,65 @@
+name:                   logstr
+version:                0.1.0.0
+synopsis:
+  Logging message/string builder with O(1) length operation.
+-- description:
+homepage:               https://github.com/trskop/lumberjack
+bug-reports:            https://github.com/trskop/lumberjack/issues
+license:                BSD3
+license-file:           LICENSE
+author:                 Peter Trško
+maintainer:             peter.trsko@gmail.com
+copyright:              (c) 2015-2016, Peter Trško
+category:               Data
+build-type:             Simple
+cabal-version:          >=1.10
+
+extra-source-files:
+    ChangeLog.md
+  , LICENSE.fast-logger
+  , README.md
+
+flag pedantic
+  description:          Pass additional warning flags to GHC.
+  default:              False
+  manual:               True
+
+library
+  hs-source-dirs:      src
+  exposed-modules:
+      Data.LogStr
+    , Data.LogStr.Internal
+  -- other-modules:
+
+  default-language:    Haskell2010
+  other-extensions:
+      CPP
+    , DeriveDataTypeable
+    , DeriveGeneric
+    , FlexibleInstances
+    , NoImplicitPrelude
+    , TypeFamilies
+
+  build-depends:
+      base >=4.8 && <4.9
+    , bytestring >=0.10 && <0.11
+    , text ==1.1.* || ==1.2.*
+    , case-insensitive >=0.1 && <2
+    -- ^ Only minimal and stable parts of case-insensitive API are used.
+
+    , base16-bytestring >=0.1.1.0 && <0.2
+    -- ^ Version 0.1.1.0 is the first that introduced module
+    -- "Data.ByteString.Base16.Lazy".
+    , data-default-class ==0.0.*
+    , number-length
+    , tagged
+
+  ghc-options:
+    -Wall
+    -fwarn-tabs
+
+  if flag(pedantic)
+    ghc-options:
+      -fwarn-implicit-prelude
+      -fwarn-missing-import-lists
+--    -Werror
