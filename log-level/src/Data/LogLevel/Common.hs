@@ -7,7 +7,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 -- |
 -- Module:       $HEADER$
--- Description:  TODO
+-- Description:  Logging levels common in many production systems.
 -- Copyright:    (c) 2015-2016, Peter Trško
 -- License:      BSD3
 --
@@ -16,8 +16,17 @@
 --               LambdaCase, NoImplicitPrelude, OverloadedStrings,
 --               TemplateHaskell
 --
--- TODO
+-- Logging levels common in many production systems.
 module Data.LogLevel.Common
+    (
+    -- * Common LogLevel Data Type
+      LogLevel(..)
+    , defaultLogLevel
+
+    -- * Conversion From and To LogLevel
+    , toText
+    , fromString
+    )
   where
 
 import Data.Data (Data, Typeable)
@@ -36,6 +45,8 @@ import qualified Data.CaseInsensitive as CI (map, mk, original)
 import Data.Text (Text)
 import qualified Data.Text as Text (pack, unpack)
 import Language.Haskell.TH.Syntax (Lift(lift))
+
+import Data.Default.Class (Default(def))
 
 
 -- | Commonly used log levels in production systems.
@@ -127,6 +138,12 @@ instance Lift LogLevel where
 -- | Default 'LogLevel' value is 'LevelInfo'.
 defaultLogLevel :: LogLevel
 defaultLogLevel = LevelInfo
+{-# INLINE defaultLogLevel #-}
+
+-- | @'def' = 'defaultLogLevel' = 'LevelInfo'@
+instance Default LogLevel where
+    def = defaultLogLevel
+    {-# INLINE def #-}
 
 -- | Convert a string in to 'LogLevel'. Conversion is done as follows:
 --
@@ -152,6 +169,7 @@ fromString strToText str = case CI.mk str of
     str' -> LevelOther $ CI.map strToText str'
 {-# INLINE fromString #-}
 
+-- | @'String.fromString' = 'fromString' 'String.fromString'@
 instance IsString LogLevel where
     fromString = fromString String.fromString
     {-# INLINE fromString #-}

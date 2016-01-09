@@ -18,6 +18,15 @@
 --
 -- TODO
 module Data.LogLevel.Syslog
+    (
+    -- * Syslog LogLevel Data Type
+      LogLevel(..)
+    , defaultLogLevel
+
+    -- * Conversion From and To LogLevel
+    , toText
+    , fromString
+    )
   where
 
 import Data.Data (Data, Typeable)
@@ -36,6 +45,8 @@ import qualified Data.CaseInsensitive as CI (map, mk, original)
 import Data.Text (Text)
 import qualified Data.Text as Text (pack, unpack)
 import Language.Haskell.TH.Syntax (Lift(lift))
+
+import Data.Default.Class (Default(def))
 
 
 -- | Log message priority, based on @syslog(3)@ from
@@ -85,6 +96,12 @@ instance Lift LogLevel where
 -- as e.g. Linux @logger@ command uses.
 defaultLogLevel :: LogLevel
 defaultLogLevel = LevelNotice
+{-# INLINE defaultLogLevel #-}
+
+-- | @'def' = 'defaultLogLevel' = 'LevelNotice'@
+instance Default LogLevel where
+    def = defaultLogLevel
+    {-# INLINE def #-}
 
 -- | Convert a string in to 'LogLevel'. Conversion is done as follows:
 --
@@ -116,6 +133,7 @@ fromString strToText str = case CI.mk str of
     str' -> LevelOther $ CI.map strToText str'
 {-# INLINE fromString #-}
 
+-- | @'String.fromString' = 'fromString' 'String.fromString'@
 instance IsString LogLevel where
     fromString = fromString String.fromString
     {-# INLINE fromString #-}

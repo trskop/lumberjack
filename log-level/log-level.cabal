@@ -57,6 +57,8 @@ library
     , case-insensitive >=0.1 && <2
     -- ^ Only minimal and stable parts of case-insensitive API are used.
 
+    , data-default-class ==0.0.*
+
   ghc-options:
     -Wall
     -fwarn-tabs
