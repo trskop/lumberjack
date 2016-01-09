@@ -6,19 +6,22 @@
 {-# LANGUAGE TypeFamilies #-}
 -- |
 -- Module:       $HEADER$
--- Description:  TODO
--- Copyright:    (c) 2015, Peter Trško
+-- Description:  Logging message/string builder with O(1) length operation.
+-- Copyright:    (c) 2015-2016, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
 -- Portability:  CPP, FlexibleInstances, DeriveDataTypeable, NoImplicitPrelude,
 --               TypeFamilies
 --
+-- Logging message\/string builder ('LogStr') with O(1) length operation. This
+-- package is intended for library writers and not for general usage.
+--
 -- Based on code from:
 -- <https://hackage.haskell.org/package/fast-logger fast-logger> created by
 -- Kazu Yamamoto \<kazu@iij.ad.jp\> under
 -- <https://github.com/kazu-yamamoto/logger/blob/master/fast-logger/LICENSE BSD3 license>.
-module System.Lumberjack.LogStr.Internal
+module Data.LogStr.Internal
     (
     -- * LogStr Data Type
       LogStr(..)
@@ -100,7 +103,37 @@ instance IsString LogStr where
         $ toStrictByteString . Lazy.Text.encodeUtf8 . Lazy.Text.pack
     {-# INLINEABLE fromString #-}
 
--- | @'mempty' = 'empty'@
+-- | Monoid axioms hold:
+--
+-- @
+-- forall (s :: 'LogStr').
+--   'mempty' ``mappend`` s = s ``mappend`` 'mempty' = s
+-- @
+--
+-- @
+-- forall (s1 :: 'LogStr') (s2 :: 'LogStr') (s3 :: 'LogStr').
+--   ('s1' ``mappend`` s2) ``mappend`` s3 = 's1' ``mappend`` (s2 ``mappend`` s3)
+-- @
+--
+-- Additional rules that hold:
+--
+-- @
+-- 'mempty' = 'empty'
+-- @
+--
+-- @
+-- 'length' 'mempty' = 0
+-- @
+--
+-- @
+-- forall (s1 :: 'LogStr') (s2 :: 'LogStr').
+--   'length' (s1 ``mappend`` s2) = 'length' s1 '+' 'length' s2
+-- @
+--
+-- @
+-- forall (s1 :: 'LogStr') (s2 :: 'LogStr').
+--   'fromLogStr' (s1 ``mappend`` s2) = 'fromLogStr' s1 ``mappend`` 'fromLogStr' s2
+-- @
 instance Monoid LogStr where
     mempty = empty
     {-# INLINE mempty #-}
@@ -119,7 +152,12 @@ instance Show LogStr where
 -- | Obtaining the length of 'LogStr' in O(1).
 --
 -- @
--- forall logStr. 'length' logStr = 'fromLogStr' logStr
+-- 'length' 'mempty' = 'length' 'empty' = 'length' ('fromString' \"\") = 0
+-- @
+--
+-- @
+-- forall logStr.
+--     'length' logStr = 'Strict.ByteString.length' 'fromLogStr' logStr
 -- @
 length :: LogStr -> Int
 length (LogStr n _) = n
@@ -140,6 +178,7 @@ null = (== 0) . length
 -- @
 -- 'length' 'empty' = 0
 -- 'fromLogStr' 'empty' = 'Strict.ByteString.empty'
+-- 'empty' = 'fromString' \"\"
 -- @
 empty :: LogStr
 empty = LogStr 0 (Builder.byteString Strict.ByteString.empty)
@@ -156,8 +195,8 @@ fromLogStr (LogStr _ builder) = fromBuilder builder
 --
 -- @
 -- forall str.
---     'fromLogStr' ('toLogStr' str) = str
---     'length' ('toLogStr' str) = 'Strict.ByteString.length' str
+--   'fromLogStr' ('toLogStr' str) = str
+--   'length' ('toLogStr' str) = 'Strict.ByteString.length' str
 -- @
 toLogStr :: Strict.ByteString -> LogStr
 toLogStr bs = LogStr (Strict.ByteString.length bs) (Builder.byteString bs)

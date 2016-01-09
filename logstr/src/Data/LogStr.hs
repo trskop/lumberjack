@@ -18,7 +18,7 @@
 -- <https://hackage.haskell.org/package/fast-logger fast-logger> created by
 -- Kazu Yamamoto \<kazu@iij.ad.jp\> under
 -- <https://github.com/kazu-yamamoto/logger/blob/master/fast-logger/LICENSE BSD3 license>.
-module System.Lumberjack.LogStr
+module Data.LogStr
     (
     -- * LogStr Data Type
       LogStr
@@ -40,6 +40,11 @@ module System.Lumberjack.LogStr
     , showed1
     , showed2
 
+    -- ** Converting to Space Separated Text
+    , words
+    , words1
+    , words2
+
     -- * Generic Logging Function
     , LogStrArgs(..)
     , logStr
@@ -57,6 +62,8 @@ import Data.Word (Word, Word16, Word32, Word64, Word8)
 import GHC.Generics (Generic)
 import Text.Show (Show(show))
 
+import Data.CaseInsensitive (CI)
+import qualified Data.CaseInsensitive as CI (original)
 import qualified Data.ByteString as Strict (ByteString)
 import Data.ByteString.Builder (Builder)
 import qualified Data.ByteString.Builder as Builder
@@ -97,14 +104,14 @@ import Data.NumberLength
     )
 import Data.Tagged (Tagged(Tagged))
 
-import System.Lumberjack.LogStr.Internal
+import Data.LogStr.Internal
     ( LogStr
     , empty
     , fromLogStr
     , length
     , null
     )
-import qualified System.Lumberjack.LogStr.Internal as Internal
+import qualified Data.LogStr.Internal as Internal
     ( LogStr(LogStr)
     , toLogStr
     , toLogStrWith
@@ -213,6 +220,13 @@ instance ToLogStr String where
 
 instance ToLogStr TypeRep where
     toLogStr = toLogStr . show
+
+-- {{{ Case Insensitive -------------------------------------------------------
+
+instance (ToLogStr a) => ToLogStr (CI a) where
+    toLogStr = toLogStr . CI.original
+
+-- }}} Case Insensitive -------------------------------------------------------
 
 -- {{{ Instances for strict and lazy ByteString and Text ----------------------
 
@@ -343,6 +357,29 @@ instance Show a => ToLogStr (Tagged Showed a) where
     {-# INLINEABLE toLogStr #-}
 
 -- }}} Showed -----------------------------------------------------------------
+
+-- {{{ Words ------------------------------------------------------------------
+
+data Words
+  deriving (Generic, Typeable)
+
+words :: a -> Tagged Words a
+words = Tagged
+{-# INLINE words #-}
+
+words1 :: (a -> b) -> a -> Tagged Words b
+words1 = (words .)
+{-# INLINE words1 #-}
+
+words2 :: (a -> b -> c) -> a -> b -> Tagged Words c
+words2 = (words1 .)
+{-# INLINE words2 #-}
+
+--instance (Foldable f, ToLogStr a) => ToLogStr (Tagged Words (f a)) where
+--    toLogStr (Tagged as) = ...
+--    {-# INLINEABLE toLogStr #-}
+
+-- }}} Words ------------------------------------------------------------------
 -- }}} ToLogStr ---------------------------------------------------------------
 
 -- {{{ Generic Logging Function -----------------------------------------------
@@ -394,5 +431,15 @@ mkLogStrT len toBuilder (Tagged a) = mkLogStr len toBuilder a
 proxyOf :: a -> Proxy a
 proxyOf _ = Proxy
 {-# INLINE proxyOf #-}
+
+--newtype Cons f a = Cons {unCons :: a (f a)}
+--
+--instance Functor f => Cons f where
+--    fmap f (Cons a as) = Cons (f a) (fmap f as)
+--
+--newtype Snoc f a = Snoc {unSnoc :: (f a) a}
+--
+--instance Functor f => Snoc f where
+--    fmap f (Snoc as a) = Snoc (fmap f as) (f a)
 
 -- }}} Utility Functions ------------------------------------------------------
