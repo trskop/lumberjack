@@ -1,0 +1,70 @@
+name:                   log-level
+version:                0.1.0.0
+synopsis:               Commonly used data types for encoding logging levels.
+description:
+  Library describes two commonly used logging level schemas:
+  .
+  * Syslog style logging levels: @Emergency, Alert, Critical, Error,
+    Warning, Notice, Info, and Debug@
+  .
+  * Logging levels common in many production systems, very similar to what e.g.
+    log4j uses: @Error, Warning, Info, Debug, and Trace@
+  .
+  Each serious logging framework has to deal with logign levels, but most of
+  them use their own data types to define them. As a consequence it is harder
+  then it should be to combine functionality of multiple logging frameworks.
+
+homepage:               https://github.com/trskop/lumberjack
+bug-reports:            https://github.com/trskop/lumberjack/issues
+license:                BSD3
+license-file:           LICENSE
+author:                 Peter Trško
+maintainer:             peter.trsko@gmail.com
+copyright:              (c) 2015-2016, Peter Trško
+category:               Data, Logging
+build-type:             Simple
+cabal-version:          >=1.10
+
+extra-source-files:
+    ChangeLog.md
+  , README.md
+
+flag pedantic
+  description:          Pass additional warning flags to GHC.
+  default:              False
+  manual:               True
+
+library
+  hs-source-dirs:       src
+  exposed-modules:
+      Data.LogLevel.Syslog
+--  , Data.LogLevel.Common
+  -- other-modules:
+
+  default-language:     Haskell2010
+  other-extensions:
+      DeriveDataTypeable
+    , DeriveGeneric
+    , FlexibleInstances
+    , LambdaCase
+    , NoImplicitPrelude
+    , TemplateHaskell
+
+  build-depends:
+      base >=4.8 && <5
+    , template-haskell >=2.10 && <2.11
+    , text ==1.1.* || ==1.2.*
+    , case-insensitive >=0.1 && <2
+    -- ^ Only minimal and stable parts of case-insensitive API are used.
+
+    , logstr ==0.1.*
+
+  ghc-options:
+    -Wall
+    -fwarn-tabs
+
+  if flag(pedantic)
+    ghc-options:
+      -fwarn-implicit-prelude
+      -fwarn-missing-import-lists
+--    -Werror
