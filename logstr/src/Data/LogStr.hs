@@ -7,7 +7,7 @@
 -- |
 -- Module:       $HEADER$
 -- Description:  TODO
--- Copyright:    (c) 2015, Peter Trško
+-- Copyright:    (c) 2015-2016, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
@@ -102,6 +102,10 @@ import Data.NumberLength
     , NumberLength(numberLength, numberLengthHex)
     , SignedNumberLength(signedNumberLength)
     )
+-- TODO: import qualified Data.LogLevel.Common as Common (LogLevel)
+-- TODO: import qualified Data.LogLevel.Common as Common.LogLevel (toText)
+import qualified Data.LogLevel.Syslog as Syslog (LogLevel)
+import qualified Data.LogLevel.Syslog as Syslog.LogLevel (toText)
 import Data.Tagged (Tagged(Tagged))
 
 import Data.LogStr.Internal
@@ -281,6 +285,20 @@ instance ToLogStr Word64 where
     toLogStr = mkLogStr numberLength Builder.word64Dec
 
 -- }}} Instances for Int* and Word* types -------------------------------------
+
+-- {{{ LogLevel ---------------------------------------------------------------
+
+instance ToLogStr Syslog.LogLevel where
+    toLogStr = toLogStr . Syslog.LogLevel.toText
+    {-# INLINEABLE toLogStr #-}
+
+{- TODO:
+instance ToLogStr Common.LogLevel where
+    toLogStr = toLogStr . Common.LogLevel.toText
+    {-# INLINEABLE toLogStr #-}
+-}
+
+-- }}} LogLevel ---------------------------------------------------------------
 
 -- {{{ Hexadecimal ------------------------------------------------------------
 

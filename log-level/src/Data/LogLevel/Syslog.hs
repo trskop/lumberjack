@@ -28,12 +28,10 @@ import Text.Read (Read)
 import Text.Show (Show(show))
 
 import Data.CaseInsensitive (CI)
-import qualified Data.CaseInsensitive as CI (mk)
+import qualified Data.CaseInsensitive as CI (mk, original)
 import Data.Text (Text)
 import qualified Data.Text as Text (pack, unpack)
 import Language.Haskell.TH.Syntax (Lift(lift))
-
-import System.Lumberjack.LogStr (ToLogStr(toLogStr))
 
 
 -- | Log message priority, based on @syslog(3)@ from
@@ -66,10 +64,6 @@ toText = \case
     level        -> CI.mk . Text.pack . List.drop 5 $ show level
 {-# INLINEABLE toText #-}
 
-instance ToLogStr LogLevel where
-    toLogStr = toLogStr . toText
-    {-# INLINEABLE toLogStr #-}
-
 instance Lift LogLevel where
     lift = \case
         LevelEmergency -> [|LevelEmergency|]
@@ -80,5 +74,5 @@ instance Lift LogLevel where
         LevelNotice    -> [|LevelNotice|]
         LevelInfo      -> [|LevelInfo|]
         LevelDebug     -> [|LevelDebug|]
-        LevelOther x   ->
-            [|LevelOther . CI.mk $ Text.pack $(lift $ Text.unpack x)|]
+        LevelOther x   -> [|LevelOther . CI.mk
+            $ Text.pack $(lift . Text.unpack $ CI.original x)|]

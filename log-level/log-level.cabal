@@ -57,8 +57,6 @@ library
     , case-insensitive >=0.1 && <2
     -- ^ Only minimal and stable parts of case-insensitive API are used.
 
-    , logstr ==0.1.*
-
   ghc-options:
     -Wall
     -fwarn-tabs

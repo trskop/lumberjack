@@ -6,7 +6,7 @@
 * First public release.
 <!--
 * Uploaded to [Hackage][]:
-  <http://hackage.haskell.org/package/between-0.1.0.0>
+  <http://hackage.haskell.org/package/log-level-0.1.0.0>
 -->
 
 

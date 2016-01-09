@@ -51,8 +51,10 @@ library
     -- ^ Version 0.1.1.0 is the first that introduced module
     -- "Data.ByteString.Base16.Lazy".
     , data-default-class ==0.0.*
+    , log-level ==0.1.*
     , number-length
-    , tagged
+    , tagged >=0 && <1
+    -- ^ Only Tagged data type is used.
 
   ghc-options:
     -Wall
