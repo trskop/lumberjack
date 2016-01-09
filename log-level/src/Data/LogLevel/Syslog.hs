@@ -3,6 +3,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 -- |
 -- Module:       $HEADER$
@@ -12,7 +13,8 @@
 --
 -- Stability:    experimental
 -- Portability:  DeriveDataTypeable, DeriveGeneric, FlexibleInstances,
---               LambdaCase, NoImplicitPrelude, TemplateHaskell
+--               LambdaCase, NoImplicitPrelude, OverloadedStrings,
+--               TemplateHaskell
 --
 -- TODO
 module Data.LogLevel.Syslog
@@ -23,12 +25,14 @@ import Data.Eq (Eq)
 import Data.Function ((.), ($))
 import qualified Data.List as List (drop)
 import Data.Ord (Ord)
+import Data.String (IsString)
+import qualified Data.String as String (IsString(fromString))
 import GHC.Generics (Generic)
 import Text.Read (Read)
 import Text.Show (Show(show))
 
-import Data.CaseInsensitive (CI)
-import qualified Data.CaseInsensitive as CI (mk, original)
+import Data.CaseInsensitive (CI, FoldCase)
+import qualified Data.CaseInsensitive as CI (map, mk, original)
 import Data.Text (Text)
 import qualified Data.Text as Text (pack, unpack)
 import Language.Haskell.TH.Syntax (Lift(lift))
@@ -76,3 +80,42 @@ instance Lift LogLevel where
         LevelDebug     -> [|LevelDebug|]
         LevelOther x   -> [|LevelOther . CI.mk
             $ Text.pack $(lift . Text.unpack $ CI.original x)|]
+
+-- | Default 'LogLevel' value is 'LevelNotice'. This is the same default value
+-- as e.g. Linux @logger@ command uses.
+defaultLogLevel :: LogLevel
+defaultLogLevel = LevelNotice
+
+-- | Convert a string in to 'LogLevel'. Conversion is done as follows:
+--
+-- @
+-- \"\"          -> 'LevelNotice' = 'defaultLogLevel'
+-- \"emergency\" -> 'LevelEmergency'
+-- \"alert\"     -> 'LevelAlert'
+-- \"critical\"  -> 'LevelCritical'
+-- \"error\"     -> 'LevelError'
+-- \"warning\"   -> 'LevelWarning'
+-- \"notice\"    -> 'LevelNotice'
+-- \"info\"      -> 'LevelInfo'
+-- \"debug\"     -> 'LevelDebug'
+-- @
+--
+-- String comparison is done in case insensitive manner, and any other value
+-- (which is not described above) is mapped in to 'LevelOther'.
+fromString :: (Eq s, FoldCase s, IsString s) => (s -> Text) -> s -> LogLevel
+fromString strToText str = case CI.mk str of
+    "" -> LevelNotice
+    "emergency" -> LevelEmergency
+    "alert" -> LevelAlert
+    "critical" -> LevelCritical
+    "error" -> LevelError
+    "warning" -> LevelWarning
+    "notice" -> LevelNotice
+    "info" -> LevelInfo
+    "debug" -> LevelDebug
+    str' -> LevelOther $ CI.map strToText str'
+{-# INLINE fromString #-}
+
+instance IsString LogLevel where
+    fromString = fromString String.fromString
+    {-# INLINE fromString #-}

@@ -3,6 +3,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 -- |
 -- Module:       $HEADER$
@@ -12,7 +13,8 @@
 --
 -- Stability:    experimental
 -- Portability:  DeriveDataTypeable, DeriveGeneric, FlexibleInstances,
---               LambdaCase, NoImplicitPrelude, TemplateHaskell
+--               LambdaCase, NoImplicitPrelude, OverloadedStrings,
+--               TemplateHaskell
 --
 -- TODO
 module Data.LogLevel.Common
@@ -23,12 +25,14 @@ import Data.Eq (Eq)
 import Data.Function ((.), ($))
 import qualified Data.List as List (drop)
 import Data.Ord (Ord)
+import Data.String (IsString)
+import qualified Data.String as String (IsString(fromString))
 import GHC.Generics (Generic)
 import Text.Read (Read)
 import Text.Show (Show(show))
 
-import Data.CaseInsensitive (CI)
-import qualified Data.CaseInsensitive as CI (mk, original)
+import Data.CaseInsensitive (CI, FoldCase)
+import qualified Data.CaseInsensitive as CI (map, mk, original)
 import Data.Text (Text)
 import qualified Data.Text as Text (pack, unpack)
 import Language.Haskell.TH.Syntax (Lift(lift))
@@ -119,3 +123,35 @@ instance Lift LogLevel where
         LevelTrace   -> [|LevelTrace|]
         LevelOther x -> [|LevelOther . CI.mk
             $ Text.pack $(lift . Text.unpack $ CI.original x)|]
+
+-- | Default 'LogLevel' value is 'LevelInfo'.
+defaultLogLevel :: LogLevel
+defaultLogLevel = LevelInfo
+
+-- | Convert a string in to 'LogLevel'. Conversion is done as follows:
+--
+-- @
+-- \"\"        -> 'LevelInfo' = 'defaultLogLevel'
+-- \"error\"   -> 'LevelError'
+-- \"warning\" -> 'LevelWarning'
+-- \"info\"    -> 'LevelInfo'
+-- \"debug\"   -> 'LevelDebug'
+-- \"trace\"   -> 'LevelTrace'
+-- @
+--
+-- String comparison is done in case insensitive manner, and any other value
+-- (which is not described above) is mapped in to 'LevelOther'.
+fromString :: (Eq s, FoldCase s, IsString s) => (s -> Text) -> s -> LogLevel
+fromString strToText str = case CI.mk str of
+    "" -> LevelInfo
+    "error" -> LevelError
+    "warning" -> LevelWarning
+    "info" -> LevelInfo
+    "debug" -> LevelDebug
+    "trace" -> LevelTrace
+    str' -> LevelOther $ CI.map strToText str'
+{-# INLINE fromString #-}
+
+instance IsString LogLevel where
+    fromString = fromString String.fromString
+    {-# INLINE fromString #-}
