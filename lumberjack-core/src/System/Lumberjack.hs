@@ -2,7 +2,7 @@
 -- |
 -- Module:       $HEADER$
 -- Description:  TODO
--- Copyright:    (c) 2015, Peter Trško
+-- Copyright:    (c) 2015-2016, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
@@ -56,7 +56,7 @@ module System.Lumberjack
     , Location
 
     -- * Logging Levels
-    , LogLevel(..)
+--  , LogLevel(..)
 
     -- * PushLog Closure
     , PushLog
@@ -67,6 +67,31 @@ module System.Lumberjack
     , pushLogLn
     )
   where
+
+--import Data.LogLevel
+--    ( LogLevel
+--        ( LevelAlert
+--        , LevelCritical
+--        , LevelDebug
+--        , LevelEmergency
+--        , LevelError
+--        , LevelInfo
+--        , LevelNotice
+--        , LevelOther
+--        , LevelWarning
+--        )
+--     )
+import Data.LogStr
+    ( LogStr
+    , LogStrArgs(Result, logStrArgs)
+    , ToLogStr(toLogStr)
+    , fromLogStr
+    , hex
+    , logStr
+    , showed
+    , showed1
+    , showed2
+    )
 
 import System.Lumberjack.Backend
     ( LoggingBackend
@@ -81,30 +106,6 @@ import System.Lumberjack.Backend
     , withSomeLoggingBackend
     )
 import System.Lumberjack.Location (Location)
-import System.Lumberjack.LogLevel
-    ( LogLevel
-        ( LevelAlert
-        , LevelCritical
-        , LevelDebug
-        , LevelEmergency
-        , LevelError
-        , LevelInfo
-        , LevelNotice
-        , LevelOther
-        , LevelWarning
-        )
-     )
-import System.Lumberjack.LogStr
-    ( LogStr
-    , LogStrArgs(Result, logStrArgs)
-    , ToLogStr(toLogStr)
-    , fromLogStr
-    , hex
-    , logStr
-    , showed
-    , showed1
-    , showed2
-    )
 import System.Lumberjack.PushLog
     ( PushLog
     , mkPushLog

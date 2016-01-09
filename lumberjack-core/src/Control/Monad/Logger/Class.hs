@@ -4,7 +4,7 @@
 -- |
 -- Module:       $HEADER$
 -- Description:  TODO
--- Copyright:    (c) 2015, Peter Trško
+-- Copyright:    (c) 2015-2016, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
@@ -23,9 +23,10 @@ import System.IO (IO)
 
 import Control.Monad.IO.Class (MonadIO)
 
+import Data.LogStr (LogStr, LogStrArgs(logStrArgs))
+
 import System.Lumberjack.Backend (SomeLoggingBackend)
 import System.Lumberjack.PushLog (PushLog, line, str)
-import System.Lumberjack.LogStr (LogStr, LogStrArgs(logStrArgs))
 
 
 -- | Instances of this type class declare that they have the ability to send

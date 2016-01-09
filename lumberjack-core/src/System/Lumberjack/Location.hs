@@ -9,7 +9,7 @@
 -- |
 -- Module:       $HEADER$
 -- Description:  TODO
--- Copyright:    (c) 2015, Peter Trško
+-- Copyright:    (c) 2015-2016, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
@@ -49,7 +49,7 @@ import Language.Haskell.TH.Syntax (CharPos, Lift(lift), Loc(..))
 import Data.Default.Class (Default(def))
 import Data.Function.Between.Strict ((~@@^>))
 
-import System.Lumberjack.LogStr (LogStr, ToLogStr(toLogStr), logStr)
+import Data.LogStr (LogStr, ToLogStr(toLogStr), logStr)
 
 
 -- | Represents location in a Haskell source code file which is part of a

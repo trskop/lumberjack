@@ -7,7 +7,7 @@
 -- |
 -- Module:       $HEADER$
 -- Description:  TODO
--- Copyright:    (c) 2015, Peter Trško
+-- Copyright:    (c) 2015-2016, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
@@ -37,7 +37,7 @@ import Data.Typeable (typeRep)
 import Text.Show (Show(show))
 #endif
 
-import System.Lumberjack.LogStr
+import Data.LogStr
     ( LogStr
     , LogStrArgs(logStrArgs)
     , ToLogStr(toLogStr)

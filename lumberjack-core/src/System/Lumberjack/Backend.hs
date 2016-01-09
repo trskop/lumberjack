@@ -4,7 +4,7 @@
 -- |
 -- Module:       $HEADER$
 -- Description:  TODO
--- Copyright:    (c) 2015, Peter Trško
+-- Copyright:    (c) 2015-2016, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
@@ -31,7 +31,7 @@ import Data.Typeable (Typeable)
 import Data.Function (($), flip)
 import System.IO (IO)
 
-import System.Lumberjack.LogStr (LogStr)
+import Data.LogStr (LogStr)
 
 
 -- | Describes operations that can be performed on logging backend except its

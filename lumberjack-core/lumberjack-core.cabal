@@ -8,18 +8,18 @@ description:
   backend.
 
 homepage:               https://github.com/trskop/lumberjack
+bug-reports:            https://github.com/trskop/lumberjack/issues
 license:                BSD3
 license-file:           LICENSE
 author:                 Peter Trško
 maintainer:             peter.trsko@gmail.com
-copyright:              (c) 2015, Peter Trško
+copyright:              (c) 2015-2016, Peter Trško
 category:               System, Logging
 build-type:             Simple
 cabal-version:          >=1.10
 
 extra-source-files:
     ChangeLog.md
-  , LICENSE.fast-logger
   , README.md
 
 flag with-exceptions
@@ -52,11 +52,8 @@ library
     , System.Lumberjack.Backend
     , System.Lumberjack.Location
 --  , System.Lumberjack.LogFunction
-    , System.Lumberjack.LogLevel
 --  , System.Lumberjack.LogSource
-    , System.Lumberjack.LogStr
     , System.Lumberjack.LogStr.Exception
-    , System.Lumberjack.LogStr.Internal
     , System.Lumberjack.PushLog
   -- other-modules:
 
@@ -81,13 +78,12 @@ library
     -- Control.Monad.Trans.Class modules.
 
     , data-default-class ==0.0.*
-    , base16-bytestring >=0.1.1.0 && <0.2
-    -- ^ Version 0.1.1.0 is the first that introduced module
-    -- "Data.ByteString.Base16.Lazy".
     , between >=0.10.0.0
     -- ^ This package uses strict API which was introduced in version 0.10.0.0.
     , tagged
     , number-length
+    , log-level ==0.1.*
+    , logstr ==0.1.*
 
   if flag(with-exceptions)
     build-depends:      exceptions >=0.1 && <0.9

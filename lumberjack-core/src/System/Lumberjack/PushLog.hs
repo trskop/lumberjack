@@ -7,7 +7,7 @@
 -- |
 -- Module:       $HEADER$
 -- Description:  TODO
--- Copyright:    (c) 2015, Peter Trško
+-- Copyright:    (c) 2015-2016, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
@@ -29,7 +29,7 @@ import System.IO (IO)
 import Data.Default.Class (Default(def))
 
 import System.Lumberjack.Backend (LoggingBackend(..))
-import System.Lumberjack.LogStr (LogStrArgs(..), LogStr)
+import Data.LogStr (LogStrArgs(..), LogStr)
 
 
 -- | Represents closure of a function like 'pushLogStr' or 'pushLogStrLn', with
