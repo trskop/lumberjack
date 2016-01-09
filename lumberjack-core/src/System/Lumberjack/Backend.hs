@@ -17,6 +17,12 @@
 -- <https://github.com/kazu-yamamoto/logger/blob/master/fast-logger/LICENSE BSD3 license>.
 module System.Lumberjack.Backend
     (
+    -- * Usage Examples
+
+    -- ** Passing Backend Using Implicit Parameters
+    --
+    -- $implicitParameters
+
     -- * Logging Backend Type Class
       LoggingBackend(..)
 
@@ -95,7 +101,7 @@ withSomeLoggingBackend backend = ($ SomeLoggingBackend backend)
 -- Usage example:
 --
 -- @
--- 'withSomeLoggingBackendM' createLoggingBackend $ \loggingBackend ->
+-- 'withSomeLoggingBackendM' createLoggingBackend $ \\loggingBackend ->
 --     -- -->8--
 --     'pushLogStrLn' loggingBackend \"Some message.\"
 --     -- -->8--
@@ -124,3 +130,32 @@ asSomeLoggingBackendM
     -> m a
 asSomeLoggingBackendM f = (>>= asSomeLoggingBackend f)
 {-# INLINE asSomeLoggingBackendM #-}
+
+-- $implicitParameters
+--
+-- @
+-- {-\# LANGUAGE ImplicitParams \#-}
+-- {-\# LANGUAGE OverloadedStrings \#-}
+-- module Main (main)
+--   where
+--
+-- import Data.Default.Class (Default(def))
+-- import System.Lumberjack.Backend
+--     ( 'LoggingBackend'('pushLogStrLn')
+--     , 'SomeLoggingBackend'
+--     , 'withSomeLoggingBackendM'
+--     )
+-- import System.Lumberjack.FastLogger (fastLogger)
+--
+--
+-- doSomething :: (?loggingBackend :: 'SomeLoggingBackend') => IO ()
+-- doSomething = do
+--     -- -->8--
+--     'pushLogStrLn' ?loggingBackend \"Some log message.\"
+--     -- -->8--
+--     return ()
+--
+-- main :: IO ()
+-- main = 'withSomeLoggingBackendM' (fastLogger def) $ \\loggingBackend ->
+--     let ?loggingBackend = loggingBackend in doSomething
+-- @
