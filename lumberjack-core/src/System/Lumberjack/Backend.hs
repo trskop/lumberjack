@@ -23,10 +23,13 @@ module System.Lumberjack.Backend
     -- * Existential Wrapper for Logging Backend
     , SomeLoggingBackend(SomeLoggingBackend)
     , asSomeLoggingBackend
+    , asSomeLoggingBackendM
     , withSomeLoggingBackend
+    , withSomeLoggingBackendM
     )
   where
 
+import Control.Monad (Monad((>>=)))
 import Data.Typeable (Typeable)
 import Data.Function (($), flip)
 import System.IO (IO)
@@ -87,8 +90,37 @@ withSomeLoggingBackend
 withSomeLoggingBackend backend = ($ SomeLoggingBackend backend)
 {-# INLINE withSomeLoggingBackend #-}
 
+-- | Monadic version of 'withSomeLoggingBackendM'.
+--
+-- Usage example:
+--
+-- @
+-- 'withSomeLoggingBackendM' createLoggingBackend $ \loggingBackend ->
+--     -- -->8--
+--     'pushLogStrLn' loggingBackend \"Some message.\"
+--     -- -->8--
+-- @
+withSomeLoggingBackendM
+    :: (Monad m, LoggingBackend b)
+    => m b
+    -- ^ Action that creates\/initializes logging backend.
+    -> (SomeLoggingBackend -> m a)
+    -> m a
+withSomeLoggingBackendM = flip asSomeLoggingBackendM
+{-# INLINE withSomeLoggingBackendM #-}
+
 -- | Flipped version of 'withSomeLoggingBackend'.
 asSomeLoggingBackend
     :: LoggingBackend b => (SomeLoggingBackend -> a) -> b -> a
 asSomeLoggingBackend = flip withSomeLoggingBackend
 {-# INLINE asSomeLoggingBackend #-}
+
+-- | Flipped version of 'withSomeLoggingBackendM'.
+asSomeLoggingBackendM
+    :: (Monad m, LoggingBackend b)
+    => (SomeLoggingBackend -> m a)
+    -> m b
+    -- ^ Action that creates\/initializes logging backend.
+    -> m a
+asSomeLoggingBackendM f = (>>= asSomeLoggingBackend f)
+{-# INLINE asSomeLoggingBackendM #-}
