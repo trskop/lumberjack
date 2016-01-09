@@ -102,8 +102,8 @@ import Data.NumberLength
     , NumberLength(numberLength, numberLengthHex)
     , SignedNumberLength(signedNumberLength)
     )
--- TODO: import qualified Data.LogLevel.Common as Common (LogLevel)
--- TODO: import qualified Data.LogLevel.Common as Common.LogLevel (toText)
+import qualified Data.LogLevel.Common as Common (LogLevel)
+import qualified Data.LogLevel.Common as Common.LogLevel (toText)
 import qualified Data.LogLevel.Syslog as Syslog (LogLevel)
 import qualified Data.LogLevel.Syslog as Syslog.LogLevel (toText)
 import Data.Tagged (Tagged(Tagged))
@@ -292,11 +292,9 @@ instance ToLogStr Syslog.LogLevel where
     toLogStr = toLogStr . Syslog.LogLevel.toText
     {-# INLINEABLE toLogStr #-}
 
-{- TODO:
 instance ToLogStr Common.LogLevel where
     toLogStr = toLogStr . Common.LogLevel.toText
     {-# INLINEABLE toLogStr #-}
--}
 
 -- }}} LogLevel ---------------------------------------------------------------
 
