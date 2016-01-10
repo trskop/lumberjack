@@ -3,7 +3,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 -- |
 -- Module:       $HEADER$
--- Description:  TODO
+-- Description:  Generic interface for logging backends.
 -- Copyright:    (c) 2015-2016, Peter Trško
 -- License:      BSD3
 --
@@ -11,9 +11,9 @@
 -- Portability:  DeriveDataTypeable, ExistentialQuantification,
 --               NoImplicitPrelude
 --
--- Inspired by:
--- <https://hackage.haskell.org/package/fast-logger fast-logger> created by
--- Kazu Yamamoto \<kazu@iij.ad.jp\> under
+-- Generic interface for logging backends. Inspired by
+-- <https://hackage.haskell.org/package/fast-logger fast-logger> package
+-- created by Kazu Yamamoto \<kazu@iij.ad.jp\> under
 -- <https://github.com/kazu-yamamoto/logger/blob/master/fast-logger/LICENSE BSD3 license>.
 module System.Lumberjack.Backend
     (
@@ -31,6 +31,38 @@ module System.Lumberjack.Backend
       LoggingBackend(..)
 
     -- * Existential Wrapper for Logging Backend
+    --
+    -- | Code that doesn't require any specific logging backend should be
+    -- polymorphic, in most cases this approach is sufficient. In example:
+    --
+    -- @
+    -- doSomething :: 'LoggingBackend' b => b -> IO ()
+    -- doSomething loggingBackend = do
+    --     -- -->8--
+    --     'pushLogStrLn' loggingBackend \"Some log message.\"
+    --     -- -->8--
+    --     return ()
+    -- @
+    --
+    -- This, however, complicates type signatures. In case of things like
+    -- passing logging backend around using variosu mechanisms, like
+    -- /Implicit Parameters/, /Reflection/, or /Monad Transformer/, it might
+    -- make passing logging backend much more painful, or even imposible,
+    -- without using monomorphic type. For such cases this library provides
+    -- 'SomeLoggingBackend', which is existential wrapper for a
+    -- 'LoggingBackend' instance. This hides implementation details and exposes
+    -- only 'LoggingBackend' interface.
+    --
+    -- Modified example:
+    --
+    -- @
+    -- doSomething :: 'SomeLoggingBackend' -> IO ()
+    -- doSomething loggingBackend = do
+    --     -- -->8--
+    --     'pushLogStrLn' loggingBackend \"Some log message.\"
+    --     -- -->8--
+    --     return ()
+    -- @
     , SomeLoggingBackend(SomeLoggingBackend)
     , asSomeLoggingBackend
     , asSomeLoggingBackendM
@@ -50,8 +82,8 @@ import Data.LogStr (LogStr)
 -- | Describes operations that can be performed on logging backend except its
 -- creation, which is best left to specialized smart constructors.
 class LoggingBackend b where
-    -- | If backend is using files/network to store/send log messages, then by
-    -- calling this function it should reopen file or network connection.
+    -- | If backend is using files\/network to store\/send log messages, then
+    -- by calling this function it should reopen file or network connection.
     --
     -- When log files being rotated it is necessary to reopen it to finalize
     -- the swap of new and old log file. Similarly after detecting network
@@ -65,7 +97,7 @@ class LoggingBackend b where
     -- | Same as 'pushLogStr', but newline is appended to the log message.
     pushLogStrLn :: b -> LogStr -> IO ()
 
-    -- | Flush any log messages in a buffer awaiting to be written/sent/etc.
+    -- | Flush any log messages in a buffer awaiting to be written\/sent\/etc.
     flush :: b -> IO ()
 
     -- | Perform 'flush' and release any acquired resources. Logging backend
@@ -93,8 +125,31 @@ instance LoggingBackend SomeLoggingBackend where
     close (SomeLoggingBackend backend) = close backend
     {-# INLINE close #-}
 
--- | Wrap logginb backend in to 'SomeLoggingBackend' for it to be used by
+-- | Wrap logging backend in to 'SomeLoggingBackend' for it to be used by
 -- monomorphic function.
+--
+-- Usage example:
+--
+-- @
+-- {-\# LANGUAGE OverloadedStrings \#-}
+-- -- -->8--
+-- import System.Lumberjack.FastLogger (fastLogger)
+--
+-- -- -->8--
+--
+-- main :: IO ()
+-- main = do
+--     config <- parseCommandLineOptions
+--     loggingBackend <- fastLogger (config ^. loggerSettings)
+--     'withSomeLoggingBackend' loggingBackend $ do
+--         -- -->8--
+--         'pushLogStrLn' loggingBackend \"Some message.\"
+--         -- -->8--
+--         return ()
+-- @
+--
+-- There is also a flipped version of this function and it is named
+-- 'asSomeLoggingBackend'.
 withSomeLoggingBackend
     :: LoggingBackend b => b -> (SomeLoggingBackend -> a) -> a
 withSomeLoggingBackend backend = ($ SomeLoggingBackend backend)
@@ -105,11 +160,26 @@ withSomeLoggingBackend backend = ($ SomeLoggingBackend backend)
 -- Usage example:
 --
 -- @
--- 'withSomeLoggingBackendM' createLoggingBackend $ \\loggingBackend ->
---     -- -->8--
---     'pushLogStrLn' loggingBackend \"Some message.\"
---     -- -->8--
+-- {-\# LANGUAGE OverloadedStrings \#-}
+-- -- -->8--
+-- import System.Lumberjack.FastLogger (fastLogger)
+--
+-- -- -->8--
+--
+-- main :: IO ()
+-- main = do
+--     config <- parseCommandLineOptions
+--     'withSomeLoggingBackendM' (mkLoggingBackend config) $ \\loggingBackend ->
+--         -- -->8--
+--         'pushLogStrLn' loggingBackend \"Some message.\"
+--         -- -->8--
+--         return ()
+--   where
+--     mkLoggingBackend cfg = fastLogger (cfg ^. loggerSettings)
 -- @
+--
+-- There is also a flipped version of this function and it is named
+-- 'asSomeLoggingBackendM'.
 withSomeLoggingBackendM
     :: (Monad m, LoggingBackend b)
     => m b
@@ -119,13 +189,64 @@ withSomeLoggingBackendM
 withSomeLoggingBackendM = flip asSomeLoggingBackendM
 {-# INLINE withSomeLoggingBackendM #-}
 
--- | Flipped version of 'withSomeLoggingBackend'.
+-- | Wrap logging backend in to 'SomeLoggingBackend' for it to be used by
+-- monomorphic function.
+--
+-- Usage example:
+--
+-- @
+-- {-\# LANGUAGE OverloadedStrings \#-}
+-- -- -->8--
+-- import System.Lumberjack.FastLogger (fastLogger)
+--
+-- -- -->8--
+--
+-- main' :: SomeLoggingBackend -> IO ()
+-- main' = do
+--     -- -->8--
+--     'pushLogStrLn' loggingBackend \"Some message.\"
+--     -- -->8--
+--     return ()
+--
+-- main :: IO ()
+-- main = do
+--     config <- parseCommandLineOptions
+--     fastLogger (config ^. loggerSettings) >>= 'asSomeLoggingBackend' main'
+-- @
+--
+-- There is also a flipped version of this function and it is named
+-- 'withSomeLoggingBackend'.
 asSomeLoggingBackend
     :: LoggingBackend b => (SomeLoggingBackend -> a) -> b -> a
 asSomeLoggingBackend = flip withSomeLoggingBackend
 {-# INLINE asSomeLoggingBackend #-}
 
--- | Flipped version of 'withSomeLoggingBackendM'.
+-- | Monadic version of 'asSomeLoggingBackendM'.
+--
+-- Usage example:
+--
+-- @
+-- {-\# LANGUAGE OverloadedStrings \#-}
+-- -- -->8--
+-- import System.Lumberjack.FastLogger (fastLogger)
+--
+-- -- -->8--
+--
+-- main' :: SomeLoggingBackend -> IO ()
+-- main' = do
+--     -- -->8--
+--     'pushLogStrLn' loggingBackend \"Some message.\"
+--     -- -->8--
+--     return ()
+--
+-- main :: IO ()
+-- main = do
+--     config <- parseCommandLineOptions
+--     'asSomeLoggingBackendM' main' . fastLogger $ config ^. loggerSettings
+-- @
+--
+-- There is also a flipped version of this function and it is named
+-- 'withSomeLoggingBackendM'.
 asSomeLoggingBackendM
     :: (Monad m, LoggingBackend b)
     => (SomeLoggingBackend -> m a)
@@ -164,6 +285,9 @@ asSomeLoggingBackendM f = (>>= asSomeLoggingBackend f)
 -- main = 'withSomeLoggingBackendM' (fastLogger def) $ \\loggingBackend ->
 --     let ?loggingBackend = loggingBackend in doSomething
 -- @
+--
+-- Form more information see Haskell Wiki article
+-- <https://wiki.haskell.org/Implicit_parameters Implicit parameters>.
 
 -- $reflection
 --
@@ -203,3 +327,11 @@ asSomeLoggingBackendM f = (>>= asSomeLoggingBackend f)
 -- main = 'withSomeLoggingBackendM' (fastLogger def) $ \loggingBackend ->
 --     reify loggingBackend (proxyT doSomething)
 -- @
+--
+-- For more information on /Scoped Type Variables/ language extension see
+-- Haskell Wiki article
+-- <https://wiki.haskell.org/Scoped_type_variables Scoped type variables>.
+--
+-- Understanding /Reflection/ is little more complicated. There is a great
+-- article on School of Haskell
+-- <https://www.schoolofhaskell.com/user/thoughtpolice/using-reflection Reflecting values to types and back>.
