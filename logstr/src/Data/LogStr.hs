@@ -103,9 +103,9 @@ import Data.NumberLength
     , SignedNumberLength(signedNumberLength)
     )
 import qualified Data.LogLevel.Common as Common (LogLevel)
-import qualified Data.LogLevel.Common as Common.LogLevel (toText)
+import qualified Data.LogLevel.Common as Common.LogLevel (toString)
 import qualified Data.LogLevel.Syslog as Syslog (LogLevel)
-import qualified Data.LogLevel.Syslog as Syslog.LogLevel (toText)
+import qualified Data.LogLevel.Syslog as Syslog.LogLevel (toString)
 import Data.Tagged (Tagged(Tagged))
 
 import Data.LogStr.Internal
@@ -289,11 +289,11 @@ instance ToLogStr Word64 where
 -- {{{ LogLevel ---------------------------------------------------------------
 
 instance ToLogStr Syslog.LogLevel where
-    toLogStr = toLogStr . Syslog.LogLevel.toText
+    toLogStr level = toLogStr (Syslog.LogLevel.toString level :: Strict.Text)
     {-# INLINEABLE toLogStr #-}
 
 instance ToLogStr Common.LogLevel where
-    toLogStr = toLogStr . Common.LogLevel.toText
+    toLogStr level = toLogStr (Common.LogLevel.toString level :: Strict.Text)
     {-# INLINEABLE toLogStr #-}
 
 -- }}} LogLevel ---------------------------------------------------------------

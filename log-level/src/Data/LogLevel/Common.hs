@@ -24,14 +24,15 @@ module Data.LogLevel.Common
     , defaultLogLevel
 
     -- * Conversion From and To LogLevel
-    , toText
+    , toString
     , fromString
     )
   where
 
 import Data.Data (Data, Typeable)
 import Data.Eq (Eq)
-import Data.Function ((.), ($))
+import Data.Function ((.))
+import Data.Maybe (Maybe(Just, Nothing))
 import qualified Data.List as List (drop)
 import Data.Ord (Ord)
 import Data.String (IsString)
@@ -40,10 +41,8 @@ import GHC.Generics (Generic)
 import Text.Read (Read)
 import Text.Show (Show(show))
 
-import Data.CaseInsensitive (CI, FoldCase)
-import qualified Data.CaseInsensitive as CI (map, mk, original)
-import Data.Text (Text)
-import qualified Data.Text as Text (pack, unpack)
+import Data.CaseInsensitive (FoldCase)
+import qualified Data.CaseInsensitive as CI (mk)
 import Language.Haskell.TH.Syntax (Lift(lift))
 
 import Data.Default.Class (Default(def))
@@ -112,18 +111,12 @@ data LogLevel
     -- system operation, not even normal development cycle. Examples include
     -- dumping a full object hierarchy, logging some state during every
     -- iteration of a large loop, etc.
-
-    | LevelOther !(CI Text)
-    -- ^ User defined logging level. Try not to use these as it makes atomatic
-    -- log analysis harder.
   deriving (Data, Eq, Generic, Ord, Read, Show, Typeable)
 
--- | Convert (common) 'LogLevel' into (case insensitive) 'Text'.
-toText :: LogLevel -> CI Text
-toText = \case
-    LevelOther t -> t
-    level        -> CI.mk . Text.pack . List.drop 5 $ show level
-{-# INLINEABLE toText #-}
+-- | Convert (common) 'LogLevel' into a string.
+toString :: IsString string => LogLevel -> string
+toString = String.fromString . List.drop 5 . show
+{-# INLINEABLE toString #-}
 
 instance Lift LogLevel where
     lift = \case
@@ -132,8 +125,6 @@ instance Lift LogLevel where
         LevelInfo    -> [|LevelInfo|]
         LevelDebug   -> [|LevelDebug|]
         LevelTrace   -> [|LevelTrace|]
-        LevelOther x -> [|LevelOther . CI.mk
-            $ Text.pack $(lift . Text.unpack $ CI.original x)|]
 
 -- | Default 'LogLevel' value is 'LevelInfo'.
 defaultLogLevel :: LogLevel
@@ -148,28 +139,26 @@ instance Default LogLevel where
 -- | Convert a string in to 'LogLevel'. Conversion is done as follows:
 --
 -- @
--- \"\"        -> 'LevelInfo' = 'defaultLogLevel'
--- \"error\"   -> 'LevelError'
--- \"warning\" -> 'LevelWarning'
--- \"info\"    -> 'LevelInfo'
--- \"debug\"   -> 'LevelDebug'
--- \"trace\"   -> 'LevelTrace'
+-- \"\"        -> 'Just' 'defaultLogLevel'
+-- \"error\"   -> 'Just' 'LevelError'
+-- \"warning\" -> 'Just' 'LevelWarning'
+-- \"info\"    -> 'Just' 'LevelInfo'
+-- \"debug\"   -> 'Just' 'LevelDebug'
+-- \"trace\"   -> 'Just' 'LevelTrace'
 -- @
 --
 -- String comparison is done in case insensitive manner, and any other value
--- (which is not described above) is mapped in to 'LevelOther'.
-fromString :: (Eq s, FoldCase s, IsString s) => (s -> Text) -> s -> LogLevel
-fromString strToText str = case CI.mk str of
-    "" -> LevelInfo
-    "error" -> LevelError
-    "warning" -> LevelWarning
-    "info" -> LevelInfo
-    "debug" -> LevelDebug
-    "trace" -> LevelTrace
-    str' -> LevelOther $ CI.map strToText str'
+-- (which is not described above) is mapped in to 'Nothing'.
+fromString
+    :: (Eq string, FoldCase string, IsString string)
+    => string
+    -> Maybe LogLevel
+fromString str = case CI.mk str of
+    "" -> Just LevelInfo
+    "error" -> Just LevelError
+    "warning" -> Just LevelWarning
+    "info" -> Just LevelInfo
+    "debug" -> Just LevelDebug
+    "trace" -> Just LevelTrace
+    _ -> Nothing
 {-# INLINE fromString #-}
-
--- | @'String.fromString' = 'fromString' 'String.fromString'@
-instance IsString LogLevel where
-    fromString = fromString String.fromString
-    {-# INLINE fromString #-}

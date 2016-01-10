@@ -24,14 +24,15 @@ module Data.LogLevel.Syslog
     , defaultLogLevel
 
     -- * Conversion From and To LogLevel
-    , toText
+    , toString
     , fromString
     )
   where
 
 import Data.Data (Data, Typeable)
 import Data.Eq (Eq)
-import Data.Function ((.), ($))
+import Data.Function ((.))
+import Data.Maybe (Maybe(Just, Nothing))
 import qualified Data.List as List (drop)
 import Data.Ord (Ord)
 import Data.String (IsString)
@@ -40,10 +41,8 @@ import GHC.Generics (Generic)
 import Text.Read (Read)
 import Text.Show (Show(show))
 
-import Data.CaseInsensitive (CI, FoldCase)
-import qualified Data.CaseInsensitive as CI (map, mk, original)
-import Data.Text (Text)
-import qualified Data.Text as Text (pack, unpack)
+import Data.CaseInsensitive (FoldCase)
+import qualified Data.CaseInsensitive as CI (mk)
 import Language.Haskell.TH.Syntax (Lift(lift))
 
 import Data.Default.Class (Default(def))
@@ -68,16 +67,12 @@ data LogLevel
     -- ^ General information messages.
     | LevelDebug
     -- ^ Messges useful for debugging.
-    | LevelOther !(CI Text)
-    -- ^ User defined logging level.
   deriving (Data, Eq, Generic, Ord, Read, Show, Typeable)
 
--- | Convert (syslog) 'LogLevel' into (case insensitive) 'Text'.
-toText :: LogLevel -> CI Text
-toText = \case
-    LevelOther t -> t
-    level        -> CI.mk . Text.pack . List.drop 5 $ show level
-{-# INLINEABLE toText #-}
+-- | Convert (syslog) 'LogLevel' into a string.
+toString :: IsString string => LogLevel -> string
+toString = String.fromString . List.drop 5 . show
+{-# INLINEABLE toString #-}
 
 instance Lift LogLevel where
     lift = \case
@@ -89,8 +84,6 @@ instance Lift LogLevel where
         LevelNotice    -> [|LevelNotice|]
         LevelInfo      -> [|LevelInfo|]
         LevelDebug     -> [|LevelDebug|]
-        LevelOther x   -> [|LevelOther . CI.mk
-            $ Text.pack $(lift . Text.unpack $ CI.original x)|]
 
 -- | Default 'LogLevel' value is 'LevelNotice'. This is the same default value
 -- as e.g. Linux @logger@ command uses.
@@ -106,34 +99,32 @@ instance Default LogLevel where
 -- | Convert a string in to 'LogLevel'. Conversion is done as follows:
 --
 -- @
--- \"\"          -> 'LevelNotice' = 'defaultLogLevel'
--- \"emergency\" -> 'LevelEmergency'
--- \"alert\"     -> 'LevelAlert'
--- \"critical\"  -> 'LevelCritical'
--- \"error\"     -> 'LevelError'
--- \"warning\"   -> 'LevelWarning'
--- \"notice\"    -> 'LevelNotice'
--- \"info\"      -> 'LevelInfo'
--- \"debug\"     -> 'LevelDebug'
+-- \"\"          -> 'Just' 'defaultLogLevel'
+-- \"emergency\" -> 'Just' 'LevelEmergency'
+-- \"alert\"     -> 'Just' 'LevelAlert'
+-- \"critical\"  -> 'Just' 'LevelCritical'
+-- \"error\"     -> 'Just' 'LevelError'
+-- \"warning\"   -> 'Just' 'LevelWarning'
+-- \"notice\"    -> 'Just' 'LevelNotice'
+-- \"info\"      -> 'Just' 'LevelInfo'
+-- \"debug\"     -> 'Just' 'LevelDebug'
 -- @
 --
 -- String comparison is done in case insensitive manner, and any other value
--- (which is not described above) is mapped in to 'LevelOther'.
-fromString :: (Eq s, FoldCase s, IsString s) => (s -> Text) -> s -> LogLevel
-fromString strToText str = case CI.mk str of
-    "" -> LevelNotice
-    "emergency" -> LevelEmergency
-    "alert" -> LevelAlert
-    "critical" -> LevelCritical
-    "error" -> LevelError
-    "warning" -> LevelWarning
-    "notice" -> LevelNotice
-    "info" -> LevelInfo
-    "debug" -> LevelDebug
-    str' -> LevelOther $ CI.map strToText str'
+-- (which is not described above) is mapped in to 'Nothing'.
+fromString
+    :: (Eq string, FoldCase string, IsString string)
+    => string
+    -> Maybe LogLevel
+fromString str = case CI.mk str of
+    "" -> Just defaultLogLevel
+    "emergency" -> Just LevelEmergency
+    "alert" -> Just LevelAlert
+    "critical" -> Just LevelCritical
+    "error" -> Just LevelError
+    "warning" -> Just LevelWarning
+    "notice" -> Just LevelNotice
+    "info" -> Just LevelInfo
+    "debug" -> Just LevelDebug
+    _ -> Nothing
 {-# INLINE fromString #-}
-
--- | @'String.fromString' = 'fromString' 'String.fromString'@
-instance IsString LogLevel where
-    fromString = fromString String.fromString
-    {-# INLINE fromString #-}
