@@ -4,6 +4,7 @@ module Main (main)
   where
 
 import Data.Default.Class (Default(def))
+    -- <https://hackage.haskell.org/package/data-default-class>
 import System.Lumberjack.Backend
     ( LoggingBackend(pushLogStrLn)
     , SomeLoggingBackend
