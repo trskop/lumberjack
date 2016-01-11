@@ -39,7 +39,7 @@ library
   exposed-modules:
       Data.LogLevel.Classes
     , Data.LogLevel.Common
---  , Data.LogLevel.Extensible
+    , Data.LogLevel.Extensible
     , Data.LogLevel.Syslog
   -- other-modules:
 
