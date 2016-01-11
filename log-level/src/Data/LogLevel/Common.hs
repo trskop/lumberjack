@@ -47,6 +47,9 @@ import Language.Haskell.TH.Syntax (Lift(lift))
 
 import Data.Default.Class (Default(def))
 
+import Data.LogLevel.Classes (FromString, ToString)
+import qualified Data.LogLevel.Classes (FromString(fromString), ToString(toString))
+
 
 -- | Commonly used log levels in production systems.
 --
@@ -118,6 +121,10 @@ toString :: IsString string => LogLevel -> string
 toString = String.fromString . List.drop 5 . show
 {-# INLINEABLE toString #-}
 
+instance ToString LogLevel where
+    toString = toString
+    {-# INLINE toString #-}
+
 instance Lift LogLevel where
     lift = \case
         LevelError   -> [|LevelError|]
@@ -162,3 +169,7 @@ fromString str = case CI.mk str of
     "trace" -> Just LevelTrace
     _ -> Nothing
 {-# INLINE fromString #-}
+
+instance FromString LogLevel where
+    fromString = fromString
+    {-# INLINE fromString #-}
