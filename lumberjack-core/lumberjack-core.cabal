@@ -77,13 +77,14 @@ library
     -- ^ Version 0.2 was the first that introduced Control.Monad.IO.Class and
     -- Control.Monad.Trans.Class modules.
 
-    , data-default-class ==0.0.*
     , between >=0.10.0.0
     -- ^ This package uses strict API which was introduced in version 0.10.0.0.
-    , tagged
-    , number-length
+    , data-default-class ==0.0.*
     , log-level ==0.1.*
     , logstr ==0.1.*
+    , mmorph ==1.*
+    , number-length
+    , tagged
 
   if flag(with-exceptions)
     build-depends:      exceptions >=0.1 && <0.9

@@ -12,7 +12,7 @@
 -- |
 -- Module:       $HEADER$
 -- Description:  TODO
--- Copyright:    (c) 2015, Peter Trško
+-- Copyright:    (c) 2015-2016, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
@@ -58,6 +58,8 @@ import Control.Monad.Catch
     )
 #endif
     -- WITH_exceptions
+
+import Control.Monad.Morph (MFunctor(hoist), MMonad(embed))
 
 import Control.Monad.Logger.Class
     ( MonadLogger(runPushLog)
@@ -289,3 +291,19 @@ instance MonadThrow m => MonadThrow (LoggingT m) where
 
 -- }}} Instances for exceptions package ---------------------------------------
 #endif
+
+-- {{{ Instances for mmorph package -------------------------------------------
+
+instance MFunctor LoggingT where
+    -- :: Monad m
+    -- => (forall a. m a -> n a)
+    -- -> LoggingT m b -> LoggingT n b
+    hoist f (LoggingT g) = LoggingT $ \r -> f (g r)
+
+instance MMonad LoggingT where
+    -- :: Monad n
+    -- => (forall a. m a -> LoggingT n a)
+    -- -> LoggingT m b -> LoggingT n b
+    embed f (LoggingT g) = LoggingT $ \r -> _runLoggingT (f (g r)) r
+
+-- }}} Instances for mmorph package -------------------------------------------
