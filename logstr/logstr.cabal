@@ -29,6 +29,7 @@ library
   exposed-modules:
       Data.LogStr
     , Data.LogStr.Internal
+    , Data.LogStr.Formatting
   -- other-modules:
 
   default-language:    Haskell2010
@@ -51,6 +52,7 @@ library
     -- ^ Version 0.1.1.0 is the first that introduced module
     -- "Data.ByteString.Base16.Lazy".
     , data-default-class ==0.0.*
+    , HoleyMonoid ==0.1.1
     , log-level ==0.1.*
     , number-length
     , tagged >=0 && <1
