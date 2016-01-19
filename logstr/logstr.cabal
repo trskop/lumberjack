@@ -28,6 +28,7 @@ library
   hs-source-dirs:      src
   exposed-modules:
       Data.LogStr
+    , Data.LogStr.Class
     , Data.LogStr.Internal
     , Data.LogStr.Formatting
   -- other-modules:

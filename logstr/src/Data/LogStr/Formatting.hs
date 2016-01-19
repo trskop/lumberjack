@@ -28,7 +28,8 @@ import Data.Typeable (Typeable)
 import GHC.Generics (Generic, Generic1)
 
 import Data.Default.Class (Default(def))
-import Data.LogStr (LogStr, ToLogStr(toLogStr))
+import Data.LogStr.Class (ToLogStr(toLogStr))
+import Data.LogStr.Internal (LogStr)
 
 import Data.HoleyMonoid (HoleyMonoid(HoleyMonoid))
 import qualified Data.HoleyMonoid as HoleyMonoid (bind, map, now)
