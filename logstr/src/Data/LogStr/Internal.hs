@@ -51,6 +51,7 @@ import Data.Function ((.), ($), on)
 import Data.Int (Int)
 import Data.Monoid (Monoid(mappend, mempty))
 import Data.Ord (Ord(compare))
+import Data.Semigroup (Semigroup((<>)))
 import Data.String (IsString(fromString))
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
@@ -145,6 +146,9 @@ instance Monoid LogStr where
 -- comparison.
 instance Ord LogStr where
     compare = compare `on` fromLogStr
+
+instance Semigroup LogStr where
+    (<>) = mappend
 
 instance Show LogStr where
     show = show . fromLogStr
