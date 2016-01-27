@@ -6,7 +6,7 @@
 {-# LANGUAGE TypeFamilies #-}
 -- |
 -- Module:       $HEADER$
--- Description:  TODO
+-- Description:  Logging message/string builder with O(1) length operation.
 -- Copyright:    (c) 2015-2016, Peter Trško
 -- License:      BSD3
 --
@@ -14,16 +14,18 @@
 -- Portability:  CPP, FlexibleInstances, DeriveDataTypeable, NoImplicitPrelude,
 --               TypeFamilies
 --
+-- Logging message\/string builder ('LogStr') with O(1) length operation. This
+-- module only re-exports definitions from other modules.
+--
 -- This package is inspired by a lot of good packages that are out there:
 --
--- * <https://hackage.haskell.org/package/fast-logger fast-logger> created by
---   Kazu Yamamoto \<kazu@iij.ad.jp\> under
+-- * The <https://hackage.haskell.org/package/fast-logger fast-logger> package
+--   created by Kazu Yamamoto under
 --   <https://github.com/kazu-yamamoto/logger/blob/master/fast-logger/LICENSE BSD3 license>.
 --
--- * <https://hackage.haskell.org/package/formatting formatting> created
--- Chris
---   Done \<chrisdone@gmail.com\>, and a lot of others, under
---   <https://github.com/chrisdone/formatting/blob/master/LICENSE>
+-- * The <https://hackage.haskell.org/package/formatting formatting> package
+--   created Chris Done, and a lot of others, under
+--   <https://github.com/chrisdone/formatting/blob/master/LICENSE BSD3 license>.
 module Data.LogStr
     (
     -- * LogStr Data Type

@@ -5,13 +5,15 @@
 {-# LANGUAGE TypeFamilies #-}
 -- |
 -- Module:       $HEADER$
--- Description:  TODO
+-- Description:  HoleyMonoid specialized for LogStr builder.
 -- Copyright:    (c) 2016, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
 -- Portability:  DeriveDataTypeable, DeriveGeneric, FlexibleInstances,
 --               NoImplicitPrelude, TypeFamilies
+--
+-- 'HoleyMonoid' specialized for 'LogStr' builder.
 --
 -- Inspired by <https://hackage.haskell.org/package/formatting formatting>
 -- package. Kept the same naming conventions to make drop-in replecement

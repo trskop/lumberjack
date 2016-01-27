@@ -1,12 +1,15 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 -- |
 -- Module:       $HEADER$
--- Description:  TODO
+-- Description:  Combinator-based type-safe formatting for logging messages.
 -- Copyright:    (c) 2016, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
 -- Portability:  NoImplicitPrelude
+--
+-- Combinator-based type-safe formatting (like printf() or FORMAT) for logging
+-- messages.
 --
 -- Inspired by <https://hackage.haskell.org/package/formatting formatting>
 -- package. Kept the same naming conventions to make drop-in replecement

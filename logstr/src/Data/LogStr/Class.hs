@@ -6,13 +6,15 @@
 {-# LANGUAGE TypeFamilies #-}
 -- |
 -- Module:       $HEADER$
--- Description:  TODO
+-- Description:  ToLogStr class for converting values in to LogStr builder.
 -- Copyright:    (c) 2015-2016, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
 -- Portability:  CPP, FlexibleInstances, DeriveDataTypeable, NoImplicitPrelude,
 --               TypeFamilies
+--
+-- 'ToLogStr' class for converting values in to LogStr builder.
 --
 -- Based on code from:
 -- <https://hackage.haskell.org/package/fast-logger fast-logger> created by
