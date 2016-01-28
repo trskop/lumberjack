@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 -- |
 -- Module:       $HEADER$
@@ -6,7 +7,7 @@
 -- License:      BSD3
 --
 -- Stability:    experimental
--- Portability:  NoImplicitPrelude
+-- Portability:  FlexibleContexts, NoImplicitPrelude
 --
 -- Combinator-based type-safe formatting (like printf() or FORMAT) for logging
 -- messages.
@@ -24,11 +25,31 @@ module Data.LogStr.Formatting
     , run
     , runFormat
     , format
+
+    -- * Formatters
+    , hex
+    , int
+    , shown
     , something
+    , stext
+    , string
+    , text
     )
   where
 
-import Data.LogStr.Class (ToLogStr(toLogStr))
+import Prelude (Integral)
+
+import Data.Function ((.))
+import Data.String (String)
+import Text.Show (Show)
+
+import qualified Data.Text as Strict (Text)
+import qualified Data.Text.Lazy as Lazy (Text)
+
+import Data.Tagged (Tagged)
+
+import Data.LogStr.Class (Hexadecimal, ToLogStr(toLogStr))
+import qualified Data.LogStr.Class as Class (hex, showed)
 import Data.LogStr.Internal (LogStr)
 
 import Data.LogStr.Formatting.Internal
@@ -67,3 +88,21 @@ format = run
 -- | Alias for @'later' 'toLogStr'@, which works for any 'ToLogStr' instance.
 something :: ToLogStr a => Format r (a -> r)
 something = later toLogStr
+
+hex :: ToLogStr (Tagged Hexadecimal a) => Format r (a -> r)
+hex = later (toLogStr . Class.hex)
+
+int :: (Integral a, ToLogStr a) => Format r (a -> r)
+int = something
+
+shown :: Show a => Format r (a -> r)
+shown = later (toLogStr . Class.showed)
+
+string :: Format r (String -> r)
+string = something
+
+text :: Format r (Lazy.Text -> r)
+text = something
+
+stext :: Format r (Strict.Text -> r)
+stext = something
