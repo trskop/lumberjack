@@ -10,16 +10,7 @@
 
 # Description
 
-Library describes two commonly used logging level schemas:
-
-* Syslog style logging levels: `Emergency, Alert, Critical, Error, Warning,
-  Notice, Info, and Debug`
-* Logging levels common in many production systems, very similar to what e.g.
-  log4j uses: `Error, Warning, Info, Debug, and Trace`
-
-Each serious logging framework has to deal with logign levels, but most of them
-use their own data types to define them. As a consequence it is harder then it
-should be to combine functionality of multiple logging frameworks.
+Logging message/string builder with O(1) length operation.
 
 
 License
@@ -41,8 +32,8 @@ that).
   http://www.haskell.org
   "The Haskell Programming Language"
 [LICENSE]:
-  https://github.com/trskop/lumberjack/blob/master/log-level/LICENSE
-  "License of log-level package."
+  https://github.com/trskop/lumberjack/blob/master/logstr/LICENSE
+  "License of logstr package."
 [tl;dr Legal: BSD3]:
   https://tldrlegal.com/license/bsd-3-clause-license-%28revised%29
   "BSD 3-Clause License (Revised)"
