@@ -6,7 +6,7 @@
 {-# LANGUAGE TypeFamilies #-}
 -- |
 -- Module:       $HEADER$
--- Description:  Logging message/string builder with O(1) length operation.
+-- Description:  Logging message builder with O(1) length operation.
 -- Copyright:    (c) 2015-2016, Peter Trško
 -- License:      BSD3
 --
@@ -14,8 +14,8 @@
 -- Portability:  CPP, FlexibleInstances, DeriveDataTypeable, NoImplicitPrelude,
 --               TypeFamilies
 --
--- Logging message\/string builder ('LogStr') with O(1) length operation. This
--- package is intended for library writers and not for general usage.
+-- Logging message builder ('LogStr') with O(1) length operation. This package
+-- is intended for library writers and not for general usage.
 --
 -- Based on code from:
 -- <https://hackage.haskell.org/package/fast-logger fast-logger> created by

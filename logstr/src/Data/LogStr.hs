@@ -6,7 +6,7 @@
 {-# LANGUAGE TypeFamilies #-}
 -- |
 -- Module:       $HEADER$
--- Description:  Logging message/string builder with O(1) length operation.
+-- Description:  Logging message builder with O(1) length operation.
 -- Copyright:    (c) 2015-2016, Peter Trško
 -- License:      BSD3
 --
@@ -14,8 +14,8 @@
 -- Portability:  CPP, FlexibleInstances, DeriveDataTypeable, NoImplicitPrelude,
 --               TypeFamilies
 --
--- Logging message\/string builder ('LogStr') with O(1) length operation. This
--- module only re-exports definitions from other modules.
+-- Logging message builder ('LogStr') with O(1) length operation. This module
+-- only re-exports definitions from other modules.
 --
 -- This package is inspired by a lot of good packages that are out there:
 --
