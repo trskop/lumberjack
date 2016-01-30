@@ -57,8 +57,15 @@ import Text.Show (Show(show))
 import Data.CaseInsensitive (CI)
 import qualified Data.CaseInsensitive as CI (original)
 import qualified Data.ByteString as Strict (ByteString)
+#if MIN_VERSION_bytestring(0,10,2)
+-- Builder moved from Data.ByteString.Lazy.Builder to Data.ByteString.Builder
+-- module in version 0.10.2.0.
 import Data.ByteString.Builder (Builder)
 import qualified Data.ByteString.Builder as Builder
+#else
+import Data.ByteString.Lazy.Builder (Builder)
+import qualified Data.ByteString.Lazy.Builder as Builder
+#endif
     ( int16Dec
     , int16HexFixed
     , int32Dec

@@ -65,8 +65,15 @@ import qualified Data.ByteString as Strict.ByteString
     , concat
 #endif
     )
+#if MIN_VERSION_bytestring(0,10,2)
+-- Builder moved from Data.ByteString.Lazy.Builder to Data.ByteString.Builder
+-- module in version 0.10.2.0.
 import Data.ByteString.Builder (Builder)
 import qualified Data.ByteString.Builder as Builder
+#else
+import Data.ByteString.Lazy.Builder (Builder)
+import qualified Data.ByteString.Lazy.Builder as Builder
+#endif
     ( byteString
     , toLazyByteString
     )
