@@ -90,6 +90,7 @@ instance Semigroup (Format r (a -> r)) where
 instance (a ~ r) => IsString (Format r a) where
     fromString = now . fromString
 
+-- | @('.') = ('%')@
 instance Category Format where
     id = Format id
     (.) = (%)
@@ -128,8 +129,8 @@ now = Format . HoleyMonoid.now
 -- | Compose two formatters. One can think of it as a @%@ operator from
 -- @printf@ known from other languages.
 --
--- This is function si the same as specialized '.' from "Control.Category",
--- which unfortunately collides with standard function composition operator.
+-- This function is just specialized '.' from "Control.Category", which
+-- unfortunately collides with standard function composition operator.
 (%) :: Format r a -> Format r' r -> Format r' a
 Format f % Format g = Format (f . g)
 infixr 9 %

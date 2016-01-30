@@ -28,14 +28,17 @@
 --   <https://github.com/chrisdone/formatting/blob/master/LICENSE BSD3 license>.
 module Data.LogStr
     (
-    -- * LogStr Data Type
+    -- * Logging Message Builder
+    --
+    -- | Similar to any other string builder, but it provides O(1) length
+    -- operation to support more efficient I/O buffering.
       LogStr
     , fromLogStr
     , empty
     , length
     , null
 
-    -- * Conversion To LogStr
+    -- * Converting Values To LogStr
     , ToLogStr(..)
 
     -- ** Hexadecimal Representation
