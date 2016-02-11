@@ -84,7 +84,7 @@ import Data.LogStr.Internal
     )
 import Data.LogStr.Class
     ( Hexadecimal
-    , LogStrArgs(logStrArgs)
+    , LogStrArgs(Result, logStrArgs)
     , Showed
     , ToLogStr(toLogStr)
     , hex
