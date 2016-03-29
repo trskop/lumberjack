@@ -19,6 +19,7 @@ import Control.Applicative (Applicative)
 #endif
 import Control.Monad (Monad)
 import Data.Function ((.))
+import Data.Proxy (Proxy(Proxy))
 import System.IO (IO)
 
 import Control.Monad.IO.Class (MonadIO)
@@ -26,7 +27,7 @@ import Control.Monad.IO.Class (MonadIO)
 import Data.LogStr (LogStr, LogStrArgs(logStrArgs))
 
 import System.Lumberjack.Backend (SomeLoggingBackend)
-import System.Lumberjack.PushLog (PushLog, line, str)
+import System.Lumberjack.PushLog (Line, PushLog, Str)
 
 
 -- | Instances of this type class declare that they have the ability to send
@@ -72,8 +73,8 @@ runPushLogTaggedWith _ = runPushLog
 
 -- | Send 'LogStr' to logging backend without any changes.
 pushLogStr :: MonadLogger m => LogStr -> m ()
-pushLogStr = runPushLogTaggedWith str . logStrArgs
+pushLogStr = runPushLogTaggedWith (Proxy :: Proxy Str) . logStrArgs
 
 -- | Send 'LogStr' to logging backend with new line appended.
 pushLogLn :: MonadLogger m => LogStr -> m ()
-pushLogLn = runPushLogTaggedWith line . logStrArgs
+pushLogLn = runPushLogTaggedWith (Proxy :: Proxy Line) . logStrArgs

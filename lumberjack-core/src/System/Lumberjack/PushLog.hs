@@ -16,6 +16,19 @@
 --
 -- TODO
 module System.Lumberjack.PushLog
+    ( PushLog(..)
+    , mkPushLog
+    , noop
+    , runPushLog
+    , runPushLogTaggedWith
+    , forgetPushLogTag
+
+    --
+    , Str
+    , Line
+    , pushLog
+    , pushLogLn
+    )
   where
 
 import Control.Monad (Monad((>>), return))
@@ -23,7 +36,7 @@ import Data.Function ((.), ($), const, flip)
 import Data.Typeable (Typeable)
 import Data.Monoid (Monoid(mappend, mempty))
 import Data.Proxy (Proxy(Proxy))
-import GHC.Generics (Generic)
+import GHC.Generics (Generic, Generic1)
 import System.IO (IO)
 
 import Data.Default.Class (Default(def))
@@ -35,7 +48,7 @@ import Data.LogStr (LogStrArgs(..), LogStr)
 -- | Represents closure of a function like 'pushLogStr' or 'pushLogStrLn', with
 -- already bounded 'LogStr' argument.
 newtype PushLog b t = PushLog (b -> IO ())
-  deriving (Generic, Typeable)
+  deriving (Generic, Generic1, Typeable)
 
 noop :: PushLog b t
 noop = PushLog . const $ return ()
@@ -54,8 +67,8 @@ runPushLog :: LoggingBackend b => b -> PushLog b t -> IO ()
 runPushLog backend (PushLog f) = f backend
 {-# INLINE runPushLog #-}
 
--- | Variant of 'runPushLog' where type variable @t@ in @'PushLog' b t@ can is
--- restricted by type proxy. Implemented as:
+-- | Variant of 'runPushLog' where type variable @t@ in @'PushLog' b t@ can be
+-- restricted by a type proxy. Implemented as:
 --
 -- @
 -- 'runPushLogTaggedWith' :: 'Proxy' t -> b -> 'PushLog' b t -> IO ()
@@ -83,31 +96,25 @@ forgetPushLogTag
     :: LoggingBackend b
     => PushLog b t
     -> forall t'. PushLog b t'
-forgetPushLogTag (PushLog f) = PushLog f
+forgetPushLogTag (PushLog f) = PushLog f    -- = coerce
 {-# INLINE forgetPushLogTag #-}
 
 data Str
   deriving (Generic, Typeable)
 
-str :: Proxy Str
-str = Proxy
-
 data Line
   deriving (Generic, Typeable)
-
-line :: Proxy Line
-line = Proxy
 
 -- | Run 'PushLog' using provided logging backend without appending new line at
 -- the end of the log message.
 pushLog :: LoggingBackend b => b -> PushLog b Str -> IO ()
-pushLog = runPushLogTaggedWith str
+pushLog = runPushLogTaggedWith (Proxy :: Proxy Str)
 {-# INLINE pushLog #-}
 
 -- | Run 'PushLog' using provided logging backend with new line appended to the
 -- end of the log message.
 pushLogLn :: LoggingBackend b => b -> PushLog b Line -> IO ()
-pushLogLn = runPushLogTaggedWith line
+pushLogLn = runPushLogTaggedWith (Proxy :: Proxy Line)
 {-# INLINE pushLogLn #-}
 
 instance LoggingBackend b => LogStrArgs (PushLog b Str) where
