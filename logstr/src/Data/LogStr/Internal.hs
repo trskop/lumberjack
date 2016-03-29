@@ -14,13 +14,18 @@
 -- Portability:  CPP, FlexibleInstances, DeriveDataTypeable, NoImplicitPrelude,
 --               TypeFamilies
 --
--- Logging message builder ('LogStr') with O(1) length operation. This package
--- is intended for library writers and not for general usage.
+-- Logging message builder ('LogStr') with O(1) length operation. This module
+-- is intended for library writers and not for general usage. Module contains
+-- only the definition of 'LogStr' and the most basic operations.
 --
 -- Based on code from:
 -- <https://hackage.haskell.org/package/fast-logger fast-logger> created by
 -- Kazu Yamamoto under
 -- <https://github.com/kazu-yamamoto/logger/blob/master/fast-logger/LICENSE BSD3 license>.
+--
+-- Data type 'LogStr' is isomoprhic to the one provided by fast-logger library
+-- and 'Data.Coerce.coerce' can be used to convert between these two
+-- representations.
 module Data.LogStr.Internal
     (
     -- * LogStr Data Type
@@ -93,7 +98,25 @@ import Data.Default.Class (Default(def))
 
 -- | Log message builder. Monoid operations (including concatenation) are in
 -- O(1) and so is 'length'.
-data LogStr = LogStr !Int Builder
+--
+-- All definitions that construct 'LogStr' directly, need to make sure that
+-- following axiom holds:
+--
+-- @
+-- forall s.
+--   'length' s = 'Strict.ByteString.length' ('fromLogStr' s)
+-- @
+--
+-- Important consequence of the above axiom is:
+--
+-- @
+-- forall s.
+--   'length' s = 0 ==> s = 'empty'
+-- @
+data LogStr
+    = LogStr !Int Builder
+    -- ^ Using 'LogStr' data constructor directly is unsafe. One has to make
+    -- sure that the \"length\" axiom holds.
   deriving (Generic, Typeable)
 
 -- | @'def' = 'empty'@
@@ -106,6 +129,7 @@ instance Default LogStr where
 instance Eq LogStr where
     (==) = (==) `on` fromLogStr
 
+-- | Converts 'Data.String.String' to 'LogStr' using UTF-8 encoding.
 instance IsString LogStr where
     fromString = toLogStrWith
         $ toStrictByteString . Lazy.Text.encodeUtf8 . Lazy.Text.pack
@@ -114,13 +138,30 @@ instance IsString LogStr where
 -- | Monoid axioms hold:
 --
 -- @
--- forall (s :: 'LogStr').
---   'mempty' ``mappend`` s = s ``mappend`` 'mempty' = s
+-- forall s. (s ~ 'LogStr')
+--   => 'mempty' ``mappend`` s = s ``mappend`` 'mempty' = s
 -- @
 --
 -- @
--- forall (s1 :: 'LogStr') (s2 :: 'LogStr') (s3 :: 'LogStr').
---   ('s1' ``mappend`` s2) ``mappend`` s3 = 's1' ``mappend`` (s2 ``mappend`` s3)
+-- forall s1 s2 s3. (s1 ~ 'LogStr') (s2 ~ 'LogStr') (s3 ~ 'LogStr')
+--   => ('s1' ``mappend``  s2) ``mappend`` s3 =
+--       's1' ``mappend`` (s2  ``mappend`` s3)
+-- @
+--
+-- Additional axiom that is required for 'Monoid' instance to work correctly is
+-- the \"length\" axiom of 'LogStr' data type:
+--
+-- @
+-- forall s.
+--   'length' s = 'Strict.ByteString.length' ('fromLogStr' s)
+-- @
+--
+-- Violating \"length\" axiom also violates mentioned monoid axioms. Important
+-- consequence of the above axiom is:
+--
+-- @
+-- forall s. (s ~ 'LogStr')
+--   => 'length' s = 0 ==> s = 'empty'
 -- @
 --
 -- Additional rules that hold:
@@ -134,13 +175,14 @@ instance IsString LogStr where
 -- @
 --
 -- @
--- forall (s1 :: 'LogStr') (s2 :: 'LogStr').
---   'length' (s1 ``mappend`` s2) = 'length' s1 '+' 'length' s2
+-- forall s1 s2. (s1 ~ 'LogStr') (s2 ~ 'LogStr')
+--   => 'length' (s1 ``mappend`` s2) = 'length' s1 '+' 'length' s2
 -- @
 --
 -- @
--- forall (s1 :: 'LogStr') (s2 :: 'LogStr').
---   'fromLogStr' (s1 ``mappend`` s2) = 'fromLogStr' s1 ``mappend`` 'fromLogStr' s2
+-- forall s1 s2. (s1 ~ 'LogStr') (s2 ~ 'LogStr')
+--   => 'fromLogStr' (s1 ``mappend`` s2) =
+--      'fromLogStr' s1 ``mappend`` 'fromLogStr' s2
 -- @
 instance Monoid LogStr where
     mempty = empty
@@ -168,8 +210,10 @@ instance Show LogStr where
 --
 -- @
 -- forall logStr.
---     'length' logStr = 'Strict.ByteString.length' 'fromLogStr' logStr
+--   'length' logStr = 'Strict.ByteString.length' ('fromLogStr' logStr)
 -- @
+--
+-- See 'LogStr' data type for more details.
 length :: LogStr -> Int
 length (LogStr n _) = n
 {-# INLINE length #-}
@@ -177,7 +221,8 @@ length (LogStr n _) = n
 -- | Check if 'LogStr' is empty (has zero length) in O(1).
 --
 -- @
--- forall str. 'null' str = True <=> 'length' str = 0 <=> str = 'empty'
+-- forall str.
+--   'null' str = True \<==\> 'length' str = 0 \<==\> str = 'empty'
 -- @
 null :: LogStr -> Bool
 null = (== 0) . length
