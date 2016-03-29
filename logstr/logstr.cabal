@@ -76,6 +76,8 @@ test-suite unit-tests
   main-is:              unit-tests.hs
   other-modules:
       TestCase
+    , TestCase.Data.LogStr.Internal
+    , Data.LogStr.Internal
 
   default-language:     Haskell2010
   other-extensions:     DefaultSignatures, NoImplicitPrelude
