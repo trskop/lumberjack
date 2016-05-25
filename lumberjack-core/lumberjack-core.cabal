@@ -97,6 +97,9 @@ library
     -- ^ Version 2.0.0.0 is the first one that depends on transformers package.
     cpp-options:        -DWITH_mtl
 
+  if impl(ghc <8)
+    build-depends:      semigroups >=0.17 && <1
+
   if impl(ghc >=7.10)
     cpp-options:        -DAPPLICATIVE_MONAD
 

@@ -36,6 +36,7 @@ import Data.Function ((.), ($), const, flip)
 import Data.Typeable (Typeable)
 import Data.Monoid (Monoid(mappend, mempty))
 import Data.Proxy (Proxy(Proxy))
+import Data.Semigroup (Semigroup((<>)))
 import GHC.Generics (Generic, Generic1)
 import System.IO (IO)
 
@@ -52,15 +53,28 @@ newtype PushLog b t = PushLog (b -> IO ())
 
 noop :: PushLog b t
 noop = PushLog . const $ return ()
+{-# INLINE noop #-}
+
+append :: PushLog b t -> PushLog b t -> PushLog b t
+append (PushLog f) (PushLog g) =
+    PushLog $ \backend -> f backend >> g backend
+{-# INLINE append #-}
 
 -- | Doesn't push a log message in to backend, only returns ().
 instance Default (PushLog b t) where
     def = noop
+    {-# INLINE def #-}
+
+instance Semigroup (PushLog b t) where
+    (<>) = append
+    {-# INLINE (<>) #-}
 
 instance Monoid (PushLog b t) where
     mempty = noop
-    PushLog f `mappend` PushLog g =
-        PushLog $ \backend -> f backend >> g backend
+    {-# INLINE mempty #-}
+
+    mappend = append
+    {-# INLINE mappend #-}
 
 -- | Run 'PushLog' using provided logging backend.
 runPushLog :: LoggingBackend b => b -> PushLog b t -> IO ()
