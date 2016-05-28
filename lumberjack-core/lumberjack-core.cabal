@@ -98,7 +98,14 @@ library
     cpp-options:        -DWITH_mtl
 
   if impl(ghc <8)
+    -- Package base <4.9 doesn't provide Data.Semigroup.
     build-depends:      semigroups >=0.17 && <1
+
+  if impl(ghc <7.10)
+    -- Package base <4.8 doesn't provide Data.Void. Package void ==0.7 was the
+    -- first version avare of Void definition being moved to base, therefore it
+    -- is the safest choice.
+    build-depends:      void ==0.7.*
 
   if impl(ghc >=7.10)
     cpp-options:        -DAPPLICATIVE_MONAD

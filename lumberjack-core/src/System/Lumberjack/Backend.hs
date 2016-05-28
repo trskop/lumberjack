@@ -75,11 +75,15 @@ module System.Lumberjack.Backend
     )
   where
 
-import Control.Monad (Monad((>>=)))
-import Data.Typeable (Typeable)
+import Prelude (error)
+
+import Control.Monad (Monad((>>=)), return)
 import Data.Function (($), flip)
+import Data.Typeable (Typeable)
+import Data.Void (Void)
 import System.IO (IO)
 
+import Data.Default.Class (Default(def))
 import Data.LogStr (LogStr)
 
 
@@ -128,6 +132,32 @@ instance LoggingBackend SomeLoggingBackend where
 
     close (SomeLoggingBackend backend) = close backend
     {-# INLINE close #-}
+
+-- | Interpreted as \"no logging\"; used to implement
+-- @'def' :: 'SomeLoggingBackend'@.
+instance LoggingBackend Void where
+    reload _ = return ()
+    {-# INLINE reload #-}
+
+    pushLogStr   _ _msg = return ()
+    {-# INLINE pushLogStr #-}
+
+    pushLogStrLn _ _msg = return ()
+    {-# INLINE pushLogStrLn #-}
+
+    flush _ = return ()
+    {-# INLINE flush #-}
+
+    close _ = return ()
+    {-# INLINE close #-}
+
+-- |
+-- @
+-- 'def' = 'SomeLoggingBackend' (error \"SomeLoggingBackend Void\" :: 'Void')
+-- @
+instance Default SomeLoggingBackend where
+    def = SomeLoggingBackend (error "SomeLoggingBackend Void" :: Void)
+    {-# INLINE def #-}
 
 -- | Wrap logging backend in to 'SomeLoggingBackend' for it to be used by
 -- monomorphic function.
