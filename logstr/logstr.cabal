@@ -44,7 +44,7 @@ library
     , TypeFamilies
 
   build-depends:
-      base >=4.8 && <4.9
+      base >=4.8 && <4.10
     , bytestring >=0.10 && <0.11
     , text ==1.1.* || ==1.2.*
     , case-insensitive >=0.1 && <2
@@ -53,7 +53,7 @@ library
     , base16-bytestring >=0.1.1.0 && <0.2
     -- ^ Version 0.1.1.0 is the first that introduced module
     -- "Data.ByteString.Base16.Lazy".
-    , data-default-class ==0.0.*
+    , data-default-class ==0.*
     , HoleyMonoid ==0.1.1
     , log-level ==0.1.*
     , number-length ==0.*
@@ -83,7 +83,7 @@ test-suite unit-tests
   other-extensions:     DefaultSignatures, NoImplicitPrelude
 
   build-depends:
-      base >=4.8 && <4.9
+      base >=4.8 && <4.10
     , bytestring >=0.10 && <0.11
     , text ==1.1.* || ==1.2.*
     , case-insensitive >=0.1 && <2
@@ -92,7 +92,7 @@ test-suite unit-tests
     , base16-bytestring >=0.1.1.0 && <0.2
     -- ^ Version 0.1.1.0 is the first that introduced module
     -- "Data.ByteString.Base16.Lazy".
-    , data-default-class ==0.0.*
+    , data-default-class ==0.*
     , HoleyMonoid ==0.1.1
     , log-level ==0.1.*
     , number-length ==0.*

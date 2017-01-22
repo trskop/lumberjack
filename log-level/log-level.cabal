@@ -54,12 +54,12 @@ library
 
   build-depends:
       base >=4.8 && <5
-    , template-haskell >=2.10 && <2.11
+    , template-haskell >=2.10 && <2.12
     , text ==1.1.* || ==1.2.*
     , case-insensitive >=0.1 && <2
     -- ^ Only minimal and stable parts of case-insensitive API are used.
 
-    , data-default-class ==0.0.*
+    , data-default-class ==0.*
 
   ghc-options:
     -Wall
