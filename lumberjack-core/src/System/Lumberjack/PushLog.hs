@@ -42,8 +42,8 @@ import System.IO (IO)
 
 import Data.Default.Class (Default(def))
 
-import System.Lumberjack.Backend (LoggingBackend(..))
-import Data.LogStr (LogStrArgs(..), LogStr)
+import System.Lumberjack.Backend (LoggingBackend, pushLogStr, pushLogStrLn)
+import Data.LogStr (LogStrArgs(Result, logStrArgs), LogStr)
 
 
 -- | Represents closure of a function like 'pushLogStr' or 'pushLogStrLn', with

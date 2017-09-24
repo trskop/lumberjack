@@ -1,4 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# OPTIONS_GHC -Wno-missing-import-lists #-}
 -- |
 -- Module:       $HEADER$
 -- Description:  TODO

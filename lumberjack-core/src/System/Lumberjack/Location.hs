@@ -44,7 +44,18 @@ import Data.Tuple (fst, snd)
 import Data.Word (Word)
 import GHC.Generics (Generic)
 
-import Language.Haskell.TH.Syntax (CharPos, Lift(lift), Loc(..))
+import Language.Haskell.TH.Syntax
+    ( CharPos
+    , Lift(lift)
+    , Loc
+        ( Loc
+        , loc_end
+        , loc_filename
+        , loc_module
+        , loc_package
+        , loc_start
+        )
+    )
 
 import Data.Default.Class (Default(def))
 import Data.Function.Between.Strict ((~@@^>))

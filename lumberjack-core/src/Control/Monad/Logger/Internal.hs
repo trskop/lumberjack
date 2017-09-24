@@ -45,16 +45,33 @@ import Control.Monad.Writer.Class (MonadWriter(listen, pass, tell, writer))
 
 #if WITH_exceptions
 import Control.Monad.Catch
-    ( MonadCatch(..)
+    ( MonadCatch
+        ( catch
 #if MIN_VERSION_exceptions(0,6,0)
+        )
     -- In exceptions >=0.6 MonadCatch type class was split in to MonadCatch and
     -- MonadMask type classes.
-    , MonadMask(..)
+    , MonadMask
+        ( mask
+#else
+        , mask
 #endif
+    -- MIN_VERSION_exceptions(0,6,0)
+
+#if MIN_VERSION_exceptions(0,2,0)
+        -- Method uninterruptibleMask was introduced in exceptions >=0.2,
+        -- originally as part of MonadCatch, later (>=0.6) as part of MonadMask
+        -- type class.
+        , uninterruptibleMask
+#endif
+    -- MIN_VERSION_exceptions(0,2,0)
+
 #if MIN_VERSION_exceptions(0,4,0)
+        )
     -- Type class MonadThrow was factored out of MonadCatch in exceptions 0.4.
-    , MonadThrow(..)
+    , MonadThrow(throwM)
 #endif
+    -- MIN_VERSION_exceptions(0,4,0)
     )
 #endif
     -- WITH_exceptions
@@ -270,13 +287,13 @@ instance MonadCatch m => MonadCatch (LoggingT m) where
 instance MonadMask m => MonadMask (LoggingT m) where
 #endif
 
-  mask = liftMask mask
+    mask = liftMask mask
 
 #if MIN_VERSION_exceptions(0,2,0)
 -- Method uninterruptibleMask was introduced in exceptions >=0.2, originally as
 -- part of MonadCatch, later (>=0.6) as part of MonadMask type class.
 
-  uninterruptibleMask = liftMask uninterruptibleMask
+    uninterruptibleMask = liftMask uninterruptibleMask
 #endif
 
 #if MIN_VERSION_exceptions(0,4,0)
