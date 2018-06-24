@@ -4,11 +4,11 @@
 -- |
 -- Module:       $HEADER$
 -- Description:  TODO
--- Copyright:    (c) 2015-2016, Peter Trško
+-- Copyright:    (c) 2015-2018, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
--- Portability:  CPP, ExplicitForAll, NoImplicitPrelude
+-- Portability:  GHC specific language extension.
 --
 -- TODO
 module Control.Monad.Logger.Class
@@ -19,7 +19,6 @@ import Control.Applicative (Applicative)
 #endif
 import Control.Monad (Monad)
 import Data.Function ((.))
-import Data.Proxy (Proxy(Proxy))
 import System.IO (IO)
 
 import Control.Monad.IO.Class (MonadIO)
@@ -27,7 +26,7 @@ import Control.Monad.IO.Class (MonadIO)
 import Data.LogStr (LogStr, LogStrArgs(logStrArgs))
 
 import System.Lumberjack.Backend (SomeLoggingBackend)
-import System.Lumberjack.PushLog (Line, PushLog, Str)
+import System.Lumberjack.PushLog (PushLog)
 
 
 -- | Instances of this type class declare that they have the ability to send
@@ -44,37 +43,16 @@ class
     -- This function is alwaysed used with some kind of smart constructor of
     -- 'PushLog', since it doesn't directly mention any logging message.
     --
-    -- See also 'runPushLogTaggedWith', 'pushLogStr', and 'pushLogLn'.
-    runPushLog :: forall t. PushLog SomeLoggingBackend t -> m ()
+    -- See also 'runPushLog', and 'pushLogStr'.
+    runPushLog :: PushLog SomeLoggingBackend -> m ()
 
 -- | Monads that are instances of this type class have access to raw unlifted
 -- 'runPushLog'. Such monad has to be 'MonadIO' instance, since raw unlifted
 -- 'runPushLog' has 'IO' side effect, and without that 'MonadIO' instance it
 -- wouldn't be able to use it.
 class (MonadLogger m, MonadIO m) => MonadLoggerIO m where
-    askRunPushLog :: forall t. m (PushLog SomeLoggingBackend t -> IO ())
-
--- | Version of 'runPushLog' that restricts type of type tag @t@. Useful in
--- conjunction with 'logStrArgs'.
---
--- In example 'pushLogStr' is defined using 'runPushLogTaggedWith':
---
--- @
--- 'runPushLogTaggedWith' 'str' . 'logStrArgs'
---     :: 'MonadLogger' m => 'LogStr' -> m ()
--- @
-runPushLogTaggedWith
-    :: forall m proxy t
-    . MonadLogger m
-    => proxy t
-    -> PushLog SomeLoggingBackend t
-    -> m ()
-runPushLogTaggedWith _ = runPushLog
+    askRunPushLog :: m (PushLog SomeLoggingBackend -> IO ())
 
 -- | Send 'LogStr' to logging backend without any changes.
 pushLogStr :: MonadLogger m => LogStr -> m ()
-pushLogStr = runPushLogTaggedWith (Proxy :: Proxy Str) . logStrArgs
-
--- | Send 'LogStr' to logging backend with new line appended.
-pushLogLn :: MonadLogger m => LogStr -> m ()
-pushLogLn = runPushLogTaggedWith (Proxy :: Proxy Line) . logStrArgs
+pushLogStr = runPushLog . logStrArgs

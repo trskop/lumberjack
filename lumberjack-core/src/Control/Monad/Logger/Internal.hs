@@ -12,13 +12,11 @@
 -- |
 -- Module:       $HEADER$
 -- Description:  TODO
--- Copyright:    (c) 2015-2016, Peter Trško
+-- Copyright:    (c) 2015-2018 Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
--- Portability:  CPP, DeriveDataTypeable, FlexibleInstances,
---               MultiParamTypeClasses, NoImplicitPrelude, RankNTypes,
---               UndecidableInstances
+-- Portability:  GHC specific language extensions.
 --
 -- TODO
 module Control.Monad.Logger.Internal
@@ -92,7 +90,7 @@ import qualified System.Lumberjack.PushLog as PushLog (runPushLog)
 
 -- | Monad transformer that adds logging capability.
 newtype LoggingT m a = LoggingT
-    { _runLoggingT :: (forall t. PushLog SomeLoggingBackend t -> IO ()) -> m a
+    { _runLoggingT :: (PushLog SomeLoggingBackend -> IO ()) -> m a
     -- ^ See also '_evalLoggingT', 'runLoggingT' and 'evalLoggingT'.
     }
   deriving (Typeable)
@@ -100,7 +98,7 @@ newtype LoggingT m a = LoggingT
 -- | Flipped version of '_runLoggingT'. See also 'evalLoggingT' and
 -- 'runLoggingT'.
 _evalLoggingT
-    :: (forall t. PushLog SomeLoggingBackend t -> IO ())
+    :: (PushLog SomeLoggingBackend -> IO ())
     -> LoggingT m a
     -> m a
 _evalLoggingT r (LoggingT f) = f r
@@ -131,7 +129,7 @@ evalLoggingT = withRunPushLog _evalLoggingT
 -- 'evalLoggingT' functions.
 withRunPushLog
     :: LoggingBackend b
-    => ((forall t. PushLog SomeLoggingBackend t -> IO ()) -> a)
+    => ((PushLog SomeLoggingBackend -> IO ()) -> a)
     -- ^ Low-level evaluation function for 'LoggingT' monad transformer.
     -- See '_runLoggingT' and '_evalLoggingT'.
     -> b
@@ -216,11 +214,11 @@ instance
     {-# INLINEABLE runPushLog #-}
 
 instance
-#ifdef APPLICATIVE_MONAD
-    MonadIO m
-#else
-    (Applicative m, MonadIO m)
+    ( MonadIO m
+#ifndef APPLICATIVE_MONAD
+    , Applicative m
 #endif
+    )
     => MonadLoggerIO (LoggingT m)
   where
     askRunPushLog = LoggingT $ \f -> return f

@@ -50,6 +50,7 @@ library
     , Control.Monad.Logger.Internal
     , System.Lumberjack
     , System.Lumberjack.Backend
+    , System.Lumberjack.Boilerplate
     , System.Lumberjack.Location
 --  , System.Lumberjack.LogFunction
 --  , System.Lumberjack.LogSource

@@ -1,18 +1,15 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE TypeFamilies #-}
 -- |
 -- Module:       $HEADER$
 -- Description:  TODO
--- Copyright:    (c) 2015-2016, Peter Trško
+-- Copyright:    (c) 2015-2018, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
--- Portability:  CPP, DeriveDataTypeable, DeriveGeneric, FlexibleInstances,
---               NoImplicitPrelude, TypeFamilies
+-- Portability:  GHC specific language extensions.
 --
 -- TODO
 module System.Lumberjack.LogStr.Exception
@@ -24,8 +21,8 @@ import Control.Exception
         , toException
 #if MIN_VERSION_base(4,8,0)
         , displayException
-        )
 #endif
+        )
     , SomeAsyncException(SomeAsyncException)
     , SomeException(SomeException)
     )

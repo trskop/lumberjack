@@ -3,11 +3,11 @@
 -- |
 -- Module:       $HEADER$
 -- Description:  FastLogger backend for Lumberjack logging framework.
--- Copyright:    (c) 2015, Peter Trško
+-- Copyright:    (c) 2015, 2018 Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
--- Portability:  NoImplicitPrelude, RecordWildCards
+-- Portability:  GHC specific language extensions.
 --
 -- 'FastLogger' backend for Lumberjack logging framework.
 module System.Lumberjack.FastLogger

@@ -4,12 +4,11 @@
 -- |
 -- Module:       $HEADER$
 -- Description:  Generic interface for logging backends.
--- Copyright:    (c) 2015-2016, Peter Trško
+-- Copyright:    (c) 2015-2018, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
--- Portability:  DeriveDataTypeable, ExistentialQuantification,
---               NoImplicitPrelude
+-- Portability:  GHC specific language extensions.
 --
 -- Generic interface for logging backends. Inspired by
 -- <https://hackage.haskell.org/package/fast-logger fast-logger> package
@@ -43,7 +42,7 @@ module System.Lumberjack.Backend
     -- doSomething :: 'LoggingBackend' b => b -> IO ()
     -- doSomething loggingBackend = do
     --     -- -->8--
-    --     'pushLogStrLn' loggingBackend \"Some log message.\"
+    --     'pushLogStr' loggingBackend \"Some log message.\"
     --     -- -->8--
     --     return ()
     -- @
@@ -63,7 +62,7 @@ module System.Lumberjack.Backend
     -- doSomething :: 'SomeLoggingBackend' -> IO ()
     -- doSomething loggingBackend = do
     --     -- -->8--
-    --     'pushLogStrLn' loggingBackend \"Some log message.\"
+    --     'pushLogStr' loggingBackend \"Some log message.\"
     --     -- -->8--
     --     return ()
     -- @
@@ -102,9 +101,6 @@ class LoggingBackend b where
     -- | Writing a log message using the specified logging backend.
     pushLogStr :: b -> LogStr -> IO ()
 
-    -- | Same as 'pushLogStr', but newline is appended to the log message.
-    pushLogStrLn :: b -> LogStr -> IO ()
-
     -- | Flush any log messages in a buffer awaiting to be written\/sent\/etc.
     flush :: b -> IO ()
 
@@ -124,9 +120,6 @@ instance LoggingBackend SomeLoggingBackend where
     pushLogStr (SomeLoggingBackend backend) = pushLogStr backend
     {-# INLINE pushLogStr #-}
 
-    pushLogStrLn (SomeLoggingBackend backend) = pushLogStrLn backend
-    {-# INLINE pushLogStrLn #-}
-
     flush (SomeLoggingBackend backend) = flush backend
     {-# INLINE flush #-}
 
@@ -141,9 +134,6 @@ instance LoggingBackend Void where
 
     pushLogStr   _ _msg = return ()
     {-# INLINE pushLogStr #-}
-
-    pushLogStrLn _ _msg = return ()
-    {-# INLINE pushLogStrLn #-}
 
     flush _ = return ()
     {-# INLINE flush #-}
@@ -177,7 +167,7 @@ instance Default SomeLoggingBackend where
 --     loggingBackend <- fastLogger (config ^. loggerSettings)
 --     'withSomeLoggingBackend' loggingBackend $ do
 --         -- -->8--
---         'pushLogStrLn' loggingBackend \"Some message.\"
+--         'pushLogStr' loggingBackend \"Some message.\"
 --         -- -->8--
 --         return ()
 -- @
@@ -185,7 +175,10 @@ instance Default SomeLoggingBackend where
 -- There is also a flipped version of this function and it is named
 -- 'asSomeLoggingBackend'.
 withSomeLoggingBackend
-    :: LoggingBackend b => b -> (SomeLoggingBackend -> a) -> a
+    :: LoggingBackend b
+    => b
+    -> (SomeLoggingBackend -> a)
+    -> a
 withSomeLoggingBackend backend = ($ SomeLoggingBackend backend)
 {-# INLINE withSomeLoggingBackend #-}
 
@@ -205,7 +198,7 @@ withSomeLoggingBackend backend = ($ SomeLoggingBackend backend)
 --     config <- parseCommandLineOptions
 --     'withSomeLoggingBackendM' (mkLoggingBackend config) $ \\loggingBackend ->
 --         -- -->8--
---         'pushLogStrLn' loggingBackend \"Some message.\"
+--         'pushLogStr' loggingBackend \"Some message.\"
 --         -- -->8--
 --         return ()
 --   where
@@ -238,7 +231,7 @@ withSomeLoggingBackendM = flip asSomeLoggingBackendM
 -- main' :: SomeLoggingBackend -> IO ()
 -- main' = do
 --     -- -->8--
---     'pushLogStrLn' loggingBackend \"Some message.\"
+--     'pushLogStr' loggingBackend \"Some message.\"
 --     -- -->8--
 --     return ()
 --
@@ -269,7 +262,7 @@ asSomeLoggingBackend = flip withSomeLoggingBackend
 -- main' :: SomeLoggingBackend -> IO ()
 -- main' = do
 --     -- -->8--
---     'pushLogStrLn' loggingBackend \"Some message.\"
+--     'pushLogStr' loggingBackend \"Some message.\"
 --     -- -->8--
 --     return ()
 --
@@ -326,7 +319,7 @@ asSomeLoggingBackendM f = (>>= asSomeLoggingBackend f)
 -- import Data.Default.Class (Default(def))
 --     -- <https://hackage.haskell.org/package/data-default-class>
 -- import System.Lumberjack.Backend
---     ( 'LoggingBackend'('pushLogStrLn')
+--     ( 'LoggingBackend'('pushLogStr')
 --     , 'SomeLoggingBackend'
 --     , 'withSomeLoggingBackendM'
 --     )
@@ -336,7 +329,7 @@ asSomeLoggingBackendM f = (>>= asSomeLoggingBackend f)
 -- doSomething :: (?loggingBackend :: 'SomeLoggingBackend') => IO ()
 -- doSomething = do
 --     -- -->8--
---     'pushLogStrLn' ?loggingBackend \"Some log message.\"
+--     'pushLogStr' ?loggingBackend \"Some log message.\"
 --     -- -->8--
 --     return ()
 --
@@ -366,7 +359,7 @@ asSomeLoggingBackendM f = (>>= asSomeLoggingBackend f)
 -- import Data.Reflection (Reifies(reflect), reify)
 --     -- <https://hackage.haskell.org/package/reflection>
 -- import System.Lumberjack.Backend
---     ( 'LoggingBackend'('pushLogStrLn')
+--     ( 'LoggingBackend'('pushLogStr')
 --     , 'SomeLoggingBackend'
 --     , 'withSomeLoggingBackendM'
 --     )
@@ -376,7 +369,7 @@ asSomeLoggingBackendM f = (>>= asSomeLoggingBackend f)
 -- doSomething :: forall s. Reifies s 'SomeLoggingBackend' => TaggedT s IO ()
 -- doSomething = TagT $ do
 --     -- -->8--
---     'pushLogStrLn' loggingBackend \"Some log message.\"
+--     'pushLogStr' loggingBackend \"Some log message.\"
 --     -- -->8--
 --     return ()
 --   where

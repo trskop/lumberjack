@@ -2,11 +2,11 @@
 -- |
 -- Module:       $HEADER$
 -- Description:  TODO
--- Copyright:    (c) 2015-2016, Peter Trško
+-- Copyright:    (c) 2015-2018, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
--- Portability:  NoImplicitPrelude
+-- Portability:  GHC specific language extensions.
 --
 -- TODO
 module System.Lumberjack
@@ -64,7 +64,6 @@ module System.Lumberjack
 
     -- ** Run PushLog
     , pushLog
-    , pushLogLn
     )
   where
 
@@ -98,7 +97,6 @@ import System.Lumberjack.Backend
         ( close
         , flush
         , pushLogStr
-        , pushLogStrLn
         , reload
         )
     , SomeLoggingBackend(SomeLoggingBackend)
@@ -110,5 +108,4 @@ import System.Lumberjack.PushLog
     ( PushLog
     , mkPushLog
     , pushLog
-    , pushLogLn
     )

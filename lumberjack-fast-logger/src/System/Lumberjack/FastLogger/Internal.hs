@@ -6,15 +6,22 @@
 -- Module:       $HEADER$
 -- Description:  Internal definitions that may come handy when writing a
 --               library.
--- Copyright:    (c) 2015, Peter Trško
+-- Copyright:    (c) 2015, 2018 Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
--- Portability:  DeriveDataTypeable, DeriveGeneric, NamedFieldPuns,
---               NoImplicitPrelude
+-- Portability:  GHC specific language extensions.
 --
 -- Internal definitions that may come handy when writing a library.
 module System.Lumberjack.FastLogger.Internal
+    (
+      FastLogger(..)
+
+    , FastLoggerSettings(..)
+    , LoggingOutput(..)
+    , bufferSize
+    , loggingOutput
+    )
   where
 
 import Data.Data (Data, Typeable)
@@ -30,7 +37,6 @@ import System.Log.FastLogger (BufSize, LoggerSet)
 import qualified System.Log.FastLogger as FastLogger
     ( defaultBufSize
     , flushLogStr
-    , pushLogStr
     , pushLogStrLn
     , renewLoggerSet
     , rmLoggerSet
@@ -40,7 +46,6 @@ import System.Lumberjack.Backend
         ( close
         , flush
         , pushLogStr
-        , pushLogStrLn
         , reload
         )
     )
@@ -124,18 +129,13 @@ instance LoggingBackend FastLogger where
     reload (FastLogger loggerSet) = FastLogger.renewLoggerSet loggerSet
     {-# INLINE reload #-}
 
-    pushLogStrLn (FastLogger loggerSet) =
+    pushLogStr (FastLogger loggerSet) =
         FastLogger.pushLogStrLn loggerSet . unsafeCoerce
         -- Package fast-logger doesn't expose LogStr constructor. Using
         -- unsafeCoerce is correct in this example since LogStr defined in
-        -- Lumberjack is identical to the one defined in fast-logger.
-    {-# INLINE pushLogStrLn #-}
-
-    pushLogStr (FastLogger loggerSet) =
-        FastLogger.pushLogStr loggerSet . unsafeCoerce
-        -- Package fast-logger doesn't expose LogStr constructor. Using
-        -- unsafeCoerce is correct in this example since LogStr defined in
-        -- Lumberjack is identical to the one defined in fast-logger.
+        -- Lumberjack is identical to the one defined in fast-logger. However,
+        -- this may not be the case if fast-logger changes internal
+        -- representation of LogStr.
     {-# INLINE pushLogStr #-}
 
     flush (FastLogger loggerSet) = FastLogger.flushLogStr loggerSet
