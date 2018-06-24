@@ -30,10 +30,11 @@ import Data.Typeable (Typeable)
 import GHC.Generics (Generic, Generic1)
 
 import Data.Default.Class (Default(def))
-import Data.LogStr.Internal (LogStr)
-
 import Data.HoleyMonoid (HoleyMonoid(HoleyMonoid))
 import qualified Data.HoleyMonoid as HoleyMonoid (bind, map, now)
+
+import Data.LogStr.Class (LogStrArgs(Result, logStrArgs))
+import Data.LogStr.Internal (LogStr)
 
 
 -- | Represents a log message formatter.
@@ -94,6 +95,11 @@ instance (a ~ r) => IsString (Format r a) where
 instance Category Format where
     id = Format id
     (.) = (%)
+
+instance LogStrArgs (Format r r) where
+    type Result (Format r r) = Format r r
+
+    logStrArgs = now
 
 -- | Unwrap 'Format' type in to its underlying representation. See also 'run'
 -- and 'format'.
