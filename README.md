@@ -10,10 +10,12 @@ Flexible logging framework for Haskell.
 
 ```
 lumberjack/
-|-- log-level/
-|-- logstr/
-|-- lumberjack-core/
-|-- lumberjack-fast-logger/
-|-- README.md
-`-- stack-lts-*.yaml
+├─╴log-level/                 -- Data types for encoding logging levels
+├─╴logstr/                    -- Log message builder with O(1) length operation.
+├─╴lumberjack-core/           -- Lumberjack logging (meta) framework
+├─╴lumberjack-fast-logger/    -- FastLogger backend for Lumberjack
+├─╴README.md
+├─╴mk-stack-yaml.hs
+├─╴stack-template.yaml
+└─╴stack-lts-*.yaml
 ```

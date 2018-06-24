@@ -1,18 +1,15 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE TypeFamilies #-}
 -- |
 -- Module:       $HEADER$
 -- Description:  Logging message builder with O(1) length operation.
--- Copyright:    (c) 2015-2016, Peter Trško
+-- Copyright:    (c) 2015-2018 Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
--- Portability:  CPP, FlexibleInstances, DeriveDataTypeable, NoImplicitPrelude,
---               TypeFamilies
+-- Portability:  GHC specific language extensions.
 --
 -- Logging message builder ('LogStr') with O(1) length operation. This module
 -- only re-exports definitions from other modules.

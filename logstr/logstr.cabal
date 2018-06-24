@@ -1,7 +1,7 @@
 name:                   logstr
 version:                0.1.0.0
 synopsis:
-  Logging message builder with O(1) length operation.
+  Log message builder with O(1) length operation.
 -- description:
 homepage:               https://github.com/trskop/lumberjack
 bug-reports:            https://github.com/trskop/lumberjack/issues

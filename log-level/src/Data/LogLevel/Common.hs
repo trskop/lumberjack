@@ -146,7 +146,7 @@ instance Default LogLevel where
 -- | Convert a string in to 'LogLevel'. Conversion is done as follows:
 --
 -- @
--- \"\"        -> 'Just' 'defaultLogLevel'
+-- \"\"        -> 'Just' 'defaultLogLevel' -- = 'Just' 'LevelInfo'
 -- \"error\"   -> 'Just' 'LevelError'
 -- \"warning\" -> 'Just' 'LevelWarning'
 -- \"info\"    -> 'Just' 'LevelInfo'
