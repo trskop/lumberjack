@@ -7,12 +7,11 @@
 -- |
 -- Module:       $HEADER$
 -- Description:  ToLogStr class for converting values in to LogStr builder.
--- Copyright:    (c) 2015-2016, Peter Trško
+-- Copyright:    (c) 2015-2018, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
--- Portability:  CPP, FlexibleInstances, DeriveDataTypeable, NoImplicitPrelude,
---               TypeFamilies
+-- Portability:  GHC specific language extensions.
 --
 -- 'ToLogStr' class for converting values in to LogStr builder.
 --
@@ -43,10 +42,11 @@ module Data.LogStr.Class
     )
   where
 
+import Data.Char (Char)
 import Data.Data (Constr)
 import Data.Function ((.), ($), id)
 import Data.Int (Int, Int16, Int32, Int64, Int8)
-import Data.Monoid (Monoid(mappend))
+import Data.Semigroup ((<>))
 import Data.String (String)
 import Data.Typeable (Typeable, TypeRep)
 import Data.Proxy (Proxy(Proxy))
@@ -91,7 +91,7 @@ import qualified Data.Text as Strict (Text)
 --import qualified Data.Text as Strict.Text (pack)
 import qualified Data.Text.Encoding as Strict.Text (encodeUtf8)
 import qualified Data.Text.Lazy as Lazy (Text)
-import qualified Data.Text.Lazy as Lazy.Text (pack)
+import qualified Data.Text.Lazy as Lazy.Text (pack, singleton)
 import qualified Data.Text.Lazy.Encoding as Lazy.Text (encodeUtf8)
 
 import qualified Data.ByteString.Base16 as Strict.ByteString.Base16 (encode)
@@ -127,10 +127,10 @@ class ToLogStr msg where
     toLogStr :: msg -> LogStr
 
 instance (ToLogStr a, ToLogStr b) => ToLogStr (a, b) where
-    toLogStr (a, b) = toLogStr a `mappend` toLogStr b
+    toLogStr (a, b) = toLogStr a <> toLogStr b
 
 instance (ToLogStr a, ToLogStr b, ToLogStr c) => ToLogStr (a, b, c) where
-    toLogStr (a, b, c) = toLogStr a `mappend` toLogStr b `mappend` toLogStr c
+    toLogStr (a, b, c) = toLogStr a <> toLogStr b <> toLogStr c
 
 instance
     ( ToLogStr a
@@ -139,8 +139,8 @@ instance
     , ToLogStr d
     ) => ToLogStr (a, b, c, d)
   where
-    toLogStr (a, b, c, d) = toLogStr a `mappend` toLogStr b `mappend` toLogStr c
-        `mappend` toLogStr d
+    toLogStr (a, b, c, d) = toLogStr a <> toLogStr b <> toLogStr c
+        <> toLogStr d
 
 instance
     ( ToLogStr a1
@@ -150,8 +150,7 @@ instance
     , ToLogStr a5
     ) => ToLogStr (a1, a2, a3, a4, a5)
   where
-    toLogStr (a1, a2, a3, a4, a5) =
-        toLogStr (a1, a2, a3, a4) `mappend` toLogStr a5
+    toLogStr (a1, a2, a3, a4, a5) = toLogStr (a1, a2, a3, a4) <> toLogStr a5
 
 instance
     ( ToLogStr a1
@@ -163,7 +162,7 @@ instance
     ) => ToLogStr (a1, a2, a3, a4, a5, a6)
   where
     toLogStr (a1, a2, a3, a4, a5, a6) =
-        toLogStr (a1, a2, a3, a4, a5) `mappend` toLogStr a6
+        toLogStr (a1, a2, a3, a4, a5) <> toLogStr a6
 
 instance
     ( ToLogStr a1
@@ -176,7 +175,7 @@ instance
     ) => ToLogStr (a1, a2, a3, a4, a5, a6, a7)
   where
     toLogStr (a1, a2, a3, a4, a5, a6, a7) =
-        toLogStr (a1, a2, a3, a4, a5, a6) `mappend` toLogStr a7
+        toLogStr (a1, a2, a3, a4, a5, a6) <> toLogStr a7
 
 instance
     ( ToLogStr a1
@@ -190,7 +189,7 @@ instance
     ) => ToLogStr (a1, a2, a3, a4, a5, a6, a7, a8)
   where
     toLogStr (a1, a2, a3, a4, a5, a6, a7, a8) =
-        toLogStr (a1, a2, a3, a4, a5, a6, a7) `mappend` toLogStr a8
+        toLogStr (a1, a2, a3, a4, a5, a6, a7) <> toLogStr a8
 
 instance
     ( ToLogStr a1
@@ -205,7 +204,7 @@ instance
     ) => ToLogStr (a1, a2, a3, a4, a5, a6, a7, a8, a9)
   where
     toLogStr (a1, a2, a3, a4, a5, a6, a7, a8, a9) =
-        toLogStr (a1, a2, a3, a4, a5, a6, a7, a8) `mappend` toLogStr a9
+        toLogStr (a1, a2, a3, a4, a5, a6, a7, a8) <> toLogStr a9
 
 instance ToLogStr Constr where
     toLogStr = toLogStr . show
@@ -213,6 +212,9 @@ instance ToLogStr Constr where
 instance ToLogStr LogStr where
     toLogStr = id
     {-# INLINE toLogStr #-}
+
+instance ToLogStr Char where
+    toLogStr = toLogStr . Lazy.Text.singleton
 
 instance ToLogStr String where
     toLogStr = toLogStr . Lazy.Text.pack
@@ -402,7 +404,7 @@ instance LogStrArgs LogStr where
 instance (ToLogStr a, LogStrArgs r) => LogStrArgs (a -> r) where
     type Result (a -> r) = r
 
-    logStrArgs str a = logStrArgs (str `mappend` toLogStr a)
+    logStrArgs str a = logStrArgs (str <> toLogStr a)
     {-# INLINEABLE logStrArgs #-}
 
 -- }}} Variadic Log Message Concatenation -------------------------------------

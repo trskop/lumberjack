@@ -31,6 +31,7 @@ module Data.LogStr.Formatting
     , int
     , shown
     , something
+    , char
     , stext
     , string
     , text
@@ -39,6 +40,7 @@ module Data.LogStr.Formatting
 
 import Prelude (Integral)
 
+import Data.Char (Char)
 import Data.Function ((.))
 import Data.String (String)
 import Text.Show (Show)
@@ -94,6 +96,9 @@ hex = later (toLogStr . Class.hex)
 
 int :: (Integral a, ToLogStr a) => Format r (a -> r)
 int = something
+
+char :: Format r (Char -> r)
+char = something
 
 shown :: Show a => Format r (a -> r)
 shown = later (toLogStr . Class.showed)
