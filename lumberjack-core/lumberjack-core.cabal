@@ -73,7 +73,7 @@ library
       base >=4.7 && <5
     , bytestring ==0.10.*
     , text ==1.1.* || ==1.2.*
-    , template-haskell >=2.9 && <2.13
+    , template-haskell >=2.9 && <2.14
     , transformers >=0.2 && <0.6
     -- ^ Version 0.2 was the first that introduced Control.Monad.IO.Class and
     -- Control.Monad.Trans.Class modules.
@@ -88,7 +88,7 @@ library
     , tagged
 
   if flag(with-exceptions)
-    build-depends:      exceptions >=0.1 && <0.9
+    build-depends:      exceptions >=0.1 && <0.11
     -- ^ Version 0.9 may be too restrictive, since type class API of exceptions
     -- package look to be stable.
     cpp-options:        -DWITH_exceptions
