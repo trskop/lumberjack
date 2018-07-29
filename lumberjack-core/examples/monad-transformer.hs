@@ -14,7 +14,7 @@ doSomething = do
     -- -->8--
     pushLogLn "Some log message."
     -- -->8--
-    return ()
+    pure ()
 
 main :: IO ()
 main = withSomeLoggingBackendM (fastLogger def) $ runLoggingT doSomething

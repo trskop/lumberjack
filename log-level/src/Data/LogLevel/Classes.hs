@@ -6,7 +6,7 @@
 -- License:      BSD3
 --
 -- Stability:    experimental
--- Portability:  NoImplicitPrelude
+-- Portability:  GHC specific language extensions.
 --
 -- TODO
 module Data.LogLevel.Classes

@@ -14,6 +14,11 @@ cabal-version:          >=1.10
 
 extra-source-files:     ChangeLog.md, README.md
 
+flag pedantic
+  description:          Pass additional warning flags to GHC.
+  default:              False
+  manual:               True
+
 library
   hs-source-dirs:       src
   exposed-modules:
@@ -36,4 +41,18 @@ library
 
     , lumberjack-core ==0.1.*
 
-  ghc-options:          -Wall -fwarn-tabs
+  ghc-options:          -Wall
+  if flag(pedantic)
+    if impl(ghc >=8)
+      ghc-options:
+        -Wcompat
+        -Wimplicit-prelude
+        -Wmissing-import-lists
+        -Wnoncanonical-monad-instances
+        -Wnoncanonical-monoid-instances
+        -Werror
+    else
+      ghc-options:
+        -fwarn-implicit-prelude
+        -fwarn-missing-import-lists
+--      -Werror

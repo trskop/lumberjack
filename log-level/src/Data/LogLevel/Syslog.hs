@@ -12,9 +12,7 @@
 -- License:      BSD3
 --
 -- Stability:    experimental
--- Portability:  DeriveDataTypeable, DeriveGeneric, FlexibleInstances,
---               LambdaCase, NoImplicitPrelude, OverloadedStrings,
---               TemplateHaskell
+-- Portability:  GHC specific language extensions.
 --
 -- TODO
 module Data.LogLevel.Syslog

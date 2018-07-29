@@ -54,7 +54,16 @@ import Data.Bool (Bool)
 import Data.Eq (Eq((==)))
 import Data.Function ((.), ($), on)
 import Data.Int (Int)
-import Data.Monoid (Monoid(mappend, mempty))
+import Data.Monoid
+    ( Monoid
+#ifdef SEMIGROUP_MONOID
+        ( mempty
+#else
+        ( mappend
+        , mempty
+#endif
+        )
+    )
 import Data.Ord (Ord(compare))
 import Data.Semigroup (Semigroup((<>)))
 import Data.String (IsString(fromString))
@@ -135,6 +144,10 @@ instance IsString LogStr where
         $ toStrictByteString . Lazy.Text.encodeUtf8 . Lazy.Text.pack
     {-# INLINEABLE fromString #-}
 
+instance Semigroup LogStr where
+    LogStr s1 b1 <> LogStr s2 b2 = LogStr (s1 + s2) (b1 <> b2)
+    {-# INLINEABLE (<>) #-}
+
 -- | Monoid axioms hold:
 --
 -- @
@@ -188,16 +201,15 @@ instance Monoid LogStr where
     mempty = empty
     {-# INLINE mempty #-}
 
-    LogStr s1 b1 `mappend` LogStr s2 b2 = LogStr (s1 + s2) (b1 `mappend` b2)
-    {-# INLINEABLE mappend #-}
+#ifndef SEMIGROUP_MONOID
+    mappend = (<>)
+    {-# INLINE mappend #-}
+#endif
 
 -- | Converts both 'LogStr' values in to (strict) 'Strict.ByteString' before
 -- comparison.
 instance Ord LogStr where
     compare = compare `on` fromLogStr
-
-instance Semigroup LogStr where
-    (<>) = mappend
 
 instance Show LogStr where
     show = show . fromLogStr

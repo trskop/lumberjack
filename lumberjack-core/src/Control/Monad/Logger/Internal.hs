@@ -23,7 +23,14 @@ module Control.Monad.Logger.Internal
   where
 
 import Control.Applicative (Applicative((<*>), pure))
-import Control.Monad (Monad((>>=), return))
+import Control.Monad
+    ( Monad
+        ( (>>=)
+#ifndef APPLICATIVE_MONAD
+        , return
+#endif
+        )
+    )
 import Data.Function ((.), ($))
 import Data.Functor (Functor(fmap))
 import Data.Typeable (Typeable)
@@ -63,6 +70,10 @@ import Control.Monad.Catch
         , uninterruptibleMask
 #endif
     -- MIN_VERSION_exceptions(0,2,0)
+
+#if MIN_VERSION_exceptions(0,9,0)
+        , generalBracket
+#endif
 
 #if MIN_VERSION_exceptions(0,4,0)
         )
@@ -196,7 +207,9 @@ instance Applicative f => Applicative (LoggingT f) where
     (<*>) = mapLoggingT2 (<*>)
 
 instance Monad m => Monad (LoggingT m) where
-    return = liftLoggingT . return
+#ifndef APPLICATIVE_MONAD
+    return = pure
+#endif
     (>>=) = liftBindLike (>>=)
 
 -- {{{ MonadLogger and MonadLoggerIO instances --------------------------------
@@ -221,7 +234,7 @@ instance
     )
     => MonadLoggerIO (LoggingT m)
   where
-    askRunPushLog = LoggingT $ \f -> return f
+    askRunPushLog = LoggingT $ \f -> pure f
     {-# INLINEABLE askRunPushLog #-}
     -- Eta reduction is not possible due to RankNTypes.
 
@@ -292,6 +305,17 @@ instance MonadMask m => MonadMask (LoggingT m) where
 -- part of MonadCatch, later (>=0.6) as part of MonadMask type class.
 
     uninterruptibleMask = liftMask uninterruptibleMask
+#endif
+
+#if MIN_VERSION_exceptions(0,9,0)
+-- Method generalBracket was introduced in exceptions >=0.9, it's type
+-- signature is different from `bracket`.
+
+    generalBracket acquire release action = LoggingT $ \pushLog' ->
+        generalBracket
+            (_runLoggingT acquire pushLog')
+            (\a b -> _runLoggingT (release a b) pushLog')
+            (\a -> _runLoggingT (action a) pushLog')
 #endif
 
 #if MIN_VERSION_exceptions(0,4,0)

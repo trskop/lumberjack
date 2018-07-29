@@ -44,7 +44,7 @@ module System.Lumberjack.Backend
     --     -- -->8--
     --     'pushLogStr' loggingBackend \"Some log message.\"
     --     -- -->8--
-    --     return ()
+    --     pure ()
     -- @
     --
     -- This, however, complicates type signatures. In case of things like
@@ -64,19 +64,21 @@ module System.Lumberjack.Backend
     --     -- -->8--
     --     'pushLogStr' loggingBackend \"Some log message.\"
     --     -- -->8--
-    --     return ()
+    --     pure ()
     -- @
     , SomeLoggingBackend(SomeLoggingBackend)
     , asSomeLoggingBackend
     , asSomeLoggingBackendM
     , withSomeLoggingBackend
     , withSomeLoggingBackendM
+    , noLoggingBackend
     )
   where
 
 import Prelude (error)
 
-import Control.Monad (Monad((>>=)), return)
+import Control.Applicative (pure)
+import Control.Monad (Monad, (>>=))
 import Data.Function (($), flip)
 import Data.Typeable (Typeable)
 import Data.Void (Void)
@@ -129,24 +131,37 @@ instance LoggingBackend SomeLoggingBackend where
 -- | Interpreted as \"no logging\"; used to implement
 -- @'def' :: 'SomeLoggingBackend'@.
 instance LoggingBackend Void where
-    reload _ = return ()
+    reload _ = pure ()
     {-# INLINE reload #-}
 
-    pushLogStr   _ _msg = return ()
+    pushLogStr   _ _msg = pure ()
     {-# INLINE pushLogStr #-}
 
-    flush _ = return ()
+    flush _ = pure ()
     {-# INLINE flush #-}
 
-    close _ = return ()
+    close _ = pure ()
     {-# INLINE close #-}
 
--- |
+-- | Backend implementation for \"no logging\".
+--
+-- @
+-- 'noLoggingBackend' =
+--   'SomeLoggingBackend' (error \"SomeLoggingBackend Void\" :: 'Void')
+-- @
+noLoggingBackend :: SomeLoggingBackend
+noLoggingBackend = SomeLoggingBackend (error "SomeLoggingBackend Void" :: Void)
+{-# INLINE noLoggingBackend #-}
+
+-- | Please, use 'noLoggingBackend' instead of 'def' whenever possible.
+-- 'Default' class has no axioms associated with it, which can make code that
+-- uses it hard to reason about.
+--
 -- @
 -- 'def' = 'SomeLoggingBackend' (error \"SomeLoggingBackend Void\" :: 'Void')
 -- @
 instance Default SomeLoggingBackend where
-    def = SomeLoggingBackend (error "SomeLoggingBackend Void" :: Void)
+    def = noLoggingBackend
     {-# INLINE def #-}
 
 -- | Wrap logging backend in to 'SomeLoggingBackend' for it to be used by
@@ -169,7 +184,7 @@ instance Default SomeLoggingBackend where
 --         -- -->8--
 --         'pushLogStr' loggingBackend \"Some message.\"
 --         -- -->8--
---         return ()
+--         pure ()
 -- @
 --
 -- There is also a flipped version of this function and it is named
@@ -200,7 +215,7 @@ withSomeLoggingBackend backend = ($ SomeLoggingBackend backend)
 --         -- -->8--
 --         'pushLogStr' loggingBackend \"Some message.\"
 --         -- -->8--
---         return ()
+--         pure ()
 --   where
 --     mkLoggingBackend cfg = fastLogger (cfg ^. loggerSettings)
 -- @
@@ -233,7 +248,7 @@ withSomeLoggingBackendM = flip asSomeLoggingBackendM
 --     -- -->8--
 --     'pushLogStr' loggingBackend \"Some message.\"
 --     -- -->8--
---     return ()
+--     pure ()
 --
 -- main :: IO ()
 -- main = do
@@ -264,7 +279,7 @@ asSomeLoggingBackend = flip withSomeLoggingBackend
 --     -- -->8--
 --     'pushLogStr' loggingBackend \"Some message.\"
 --     -- -->8--
---     return ()
+--     pure ()
 --
 -- main :: IO ()
 -- main = do
@@ -302,13 +317,17 @@ asSomeLoggingBackendM f = (>>= asSomeLoggingBackend f)
 --     -- -->8--
 --     pushLogLn \"Some log message.\"
 --     -- -->8--
---     return ()
+--     pure ()
 --
 -- main :: IO ()
 -- main = 'withSomeLoggingBackendM' (fastLogger def) $ runLoggingT doSomething
 -- @
 
 -- $implicitParameters
+--
+-- While `ImplicitParams` language extension makes it easy to pass logging
+-- effect around, it also makes the code less predictable in some ways. Try to
+-- avoid using this unless you have a good reason to use this extension.
 --
 -- @
 -- {-\# LANGUAGE ImplicitParams \#-}
@@ -331,7 +350,7 @@ asSomeLoggingBackendM f = (>>= asSomeLoggingBackend f)
 --     -- -->8--
 --     'pushLogStr' ?loggingBackend \"Some log message.\"
 --     -- -->8--
---     return ()
+--     pure ()
 --
 -- main :: IO ()
 -- main = 'withSomeLoggingBackendM' (fastLogger def) $ \\loggingBackend ->
@@ -371,7 +390,7 @@ asSomeLoggingBackendM f = (>>= asSomeLoggingBackend f)
 --     -- -->8--
 --     'pushLogStr' loggingBackend \"Some log message.\"
 --     -- -->8--
---     return ()
+--     pure ()
 --   where
 --     loggingBackend = reflect (Proxy :: Proxy s)
 --

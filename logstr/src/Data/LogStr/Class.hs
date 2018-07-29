@@ -389,7 +389,7 @@ logStr :: LogStrArgs args => args
 logStr = logStrArgs empty
 {-# INLINE logStr #-}
 
--- | Class describes variadic arguments of 'log' function.
+-- | Class describes variadic arguments of 'logStr' function.
 class LogStrArgs a where
     type Result a
 

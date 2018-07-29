@@ -25,7 +25,7 @@ doSomething = TagT $ do
     -- -->8--
     pushLogStrLn loggingBackend "Some log message."
     -- -->8--
-    return ()
+    pure ()
   where
     loggingBackend = reflect (Proxy :: Proxy s)
 

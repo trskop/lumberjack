@@ -63,12 +63,24 @@ library
   if impl(ghc <8)
     build-depends:      semigroups >=0.16 && <1
 
-  ghc-options:          -Wall -fwarn-tabs
+  if impl(ghc >=8.4)
+    cpp-options:        -DSEMIGROUP_MONOID
+
+  ghc-options:          -Wall
   if flag(pedantic)
-    ghc-options:
-      -fwarn-implicit-prelude
-      -fwarn-missing-import-lists
---    -Werror
+    if impl(ghc >=8)
+      ghc-options:
+        -Wcompat
+        -Wimplicit-prelude
+        -Wmissing-import-lists
+        -Wnoncanonical-monad-instances
+        -Wnoncanonical-monoid-instances
+        -Werror
+    else
+      ghc-options:
+        -fwarn-implicit-prelude
+        -fwarn-missing-import-lists
+--      -Werror
 
 test-suite unit-tests
   hs-source-dirs:       src, test
@@ -118,9 +130,21 @@ test-suite unit-tests
   if impl(ghc <8)
     build-depends:      semigroups >=0.16 && <1
 
-  ghc-options:          -Wall -fwarn-tabs
+  if impl(ghc >=8.4)
+    cpp-options:        -DSEMIGROUP_MONOID
+
+  ghc-options:          -Wall
   if flag(pedantic)
-    ghc-options:
-      -fwarn-implicit-prelude
-      -fwarn-missing-import-lists
---    -Werror
+    if impl(ghc >=8)
+      ghc-options:
+        -Wcompat
+        -Wimplicit-prelude
+        -Wmissing-import-lists
+        -Wnoncanonical-monad-instances
+        -Wnoncanonical-monoid-instances
+        -Werror
+    else
+      ghc-options:
+        -fwarn-implicit-prelude
+        -fwarn-missing-import-lists
+--      -Werror

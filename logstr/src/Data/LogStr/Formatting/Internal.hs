@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -23,7 +24,16 @@ module Data.LogStr.Formatting.Internal
 
 import Control.Category (Category((.), id))
 import Data.Function (($))
-import Data.Monoid (Monoid(mappend, mempty))
+import Data.Monoid
+    ( Monoid
+#ifdef SEMIGROUP_MONOID
+        ( mempty
+#else
+        ( mappend
+        , mempty
+#endif
+        )
+    )
 import Data.Semigroup (Semigroup((<>)))
 import Data.String (IsString(fromString))
 import Data.Typeable (Typeable)
@@ -71,20 +81,25 @@ import Data.LogStr.Internal (LogStr)
 newtype Format r a = Format {toHoleyMonoid :: HoleyMonoid LogStr r a}
   deriving (Generic, Generic1, Typeable)
 
+-- | Try to use 'id' instead.
 instance Default (Format r r) where
     def = id
 
+-- | Try to use 'mempty' instead.
 instance Default (Format r (a -> r)) where
     def = mempty
 
+instance Semigroup (Format r (a -> r)) where
+    Format (HoleyMonoid f1) <> Format (HoleyMonoid f2) =
+        Format . HoleyMonoid $ \f a ->
+            f1 (\b1 -> f2 (\b2 -> f (b1 <> b2)) a) a
+
 instance Monoid (Format r (a -> r)) where
     mempty = Format . HoleyMonoid $ \f _ -> f mempty
-    Format (HoleyMonoid f1) `mappend` Format (HoleyMonoid f2) =
-        Format . HoleyMonoid $ \f a ->
-            f1 (\b1 -> f2 (\b2 -> f (b1 `mappend` b2)) a) a
 
-instance Semigroup (Format r (a -> r)) where
-    (<>) = mappend
+#ifndef SEMIGROUP_MONOID
+    mappend = (<>)
+#endif
 
 -- | Writting @\"some text\"@ is the same as writting @'now' \"some text\"@,
 -- when using /OverloadedStrings/ language extension.

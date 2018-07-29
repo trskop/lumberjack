@@ -42,6 +42,7 @@ import Data.LogStr (LogStrArgs(Result, logStrArgs), LogStr)
 newtype PushLog b = PushLog (b -> IO ())
   deriving (Generic, Typeable)
 
+-- | Doesn't push a log message in to backend, only returns '()'.
 noop :: PushLog b
 noop = PushLog . const $ pure ()
 {-# INLINE noop #-}
@@ -64,7 +65,7 @@ instance Monoid (PushLog b) where
     mempty = noop
     {-# INLINE mempty #-}
 
-    mappend = append
+    mappend = (<>)
     {-# INLINE mappend #-}
 
 -- | Run 'PushLog' using provided logging backend.
