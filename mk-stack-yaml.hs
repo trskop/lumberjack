@@ -1,5 +1,5 @@
 #!/usr/bin/env stack
--- stack --resolver lts-11.15 script
+-- stack --resolver lts-12.4 script
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -16,7 +16,8 @@ ltsVersions :: [(Word, Word)]
 ltsVersions =
     [ ( 9, 21) -- Final LTS 9 version
     , (10, 10) -- Final LTS 10 version
-    , (11, 15)
+    , (11, 19)
+    , (12, 4)
     ]
 
 stackYamlTemplate :: FilePath
