@@ -70,6 +70,7 @@ library
   build-depends:
       base >=4.7 && <5
     , bytestring ==0.10.*
+    , call-stack == 0.1.*
     , text ==1.1.* || ==1.2.*
     , template-haskell >=2.9 && <2.14
     , transformers >=0.2 && <0.6

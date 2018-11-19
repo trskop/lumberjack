@@ -9,7 +9,7 @@
 -- |
 -- Module:       $HEADER$
 -- Description:  Representation of location in a Haskell source file.
--- Copyright:    (c) 2015-2016, Peter Trško
+-- Copyright:    (c) 2015-2018, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
@@ -33,14 +33,33 @@ import Prelude
 import Data.Bool (otherwise)
 import Data.Data (Data, Typeable)
 import Data.Eq (Eq((==)))
+import Data.Foldable (fold)
 import Data.Functor (Functor)
 import Data.Int (Int)
+import qualified Data.List as List (reverse)
+import Data.Maybe (Maybe(Just, Nothing))
 import Data.Monoid (Monoid(mempty), (<>))
 import Data.Ord (Ord((<)))
-import Data.String (IsString, String)
+import Data.String (IsString, String, fromString)
 import Data.Tuple (fst, snd)
 import Data.Word (Word)
 import GHC.Generics (Generic)
+import Text.Show (show)
+
+import Data.CallStack
+    ( HasCallStack
+    , SrcLoc
+        ( SrcLoc
+        , srcLocEndCol
+        , srcLocEndLine
+        , srcLocFile
+        , srcLocModule
+        , srcLocPackage
+        , srcLocStartCol
+        , srcLocStartLine
+        )
+    , callStack
+    )
 
 import Language.Haskell.TH.Syntax
     ( CharPos
@@ -201,4 +220,54 @@ locationFromLoc Loc{..} = Location
     fromCharPos f charPos
       | n < 0     = 0
       | otherwise = fromIntegral n
-      where n = f charPos
+      where
+        n = f charPos
+
+locationFromSrcLoc :: SrcLoc -> Location'
+locationFromSrcLoc SrcLoc{..} = Location
+    { _fileName = srcLocFile
+    , _packageName = srcLocPackage
+    , _moduleName = srcLocModule
+    , _startLine = positionFromSrcLoc srcLocStartLine
+    , _startChar = positionFromSrcLoc srcLocStartCol
+    , _endLine = positionFromSrcLoc srcLocEndLine
+    , _endChar = positionFromSrcLoc srcLocEndCol
+    }
+  where
+    positionFromSrcLoc n
+      | n < 0     = 0
+      | otherwise = fromIntegral n
+
+-- | Get the position of function with top-most 'HasCallStack' constraint.
+-- Useful if logging functions should report source code location.
+--
+-- Examples:
+--
+-- @
+-- import "System.Lumberjack.Location"
+-- import "Data.CallStack" ('HasCallStack')
+--
+-- f :: 'HasCallStack' => Maybe 'Location''
+-- f = 'getLocation'
+--
+-- g :: Maybe 'Location''
+-- g = 'getLocation'
+-- @
+--
+-- Calling function @f@ will produce location of where the function @f@ was
+-- called, whereas in case of @g@ it will return location where @getLocation@
+-- was called, i.e. location where body of @g@ function is defined.
+getLocation :: HasCallStack => Maybe Location'
+getLocation = case List.reverse callStack of
+    (_, loc) : _ -> Just (locationFromSrcLoc loc)
+    []           -> Nothing
+
+-- | Format location as:
+--
+-- > "${fileName}:${startLine}:${startChar} in ${packageName}:${moduleName}"
+prettyLocation :: (Monoid str, IsString str) => Location str -> str
+prettyLocation Location{..} = fold
+    [ _fileName, ":"
+    , fromString (show _startLine), ":", fromString (show _startChar)
+    , " in ", _packageName, ":", _moduleName
+    ]
