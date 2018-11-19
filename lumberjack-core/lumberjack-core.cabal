@@ -37,6 +37,13 @@ flag with-mtl
   default:              True
   manual:               False
 
+flag with-contravariant
+  description:
+    Provide instances for Contravariant type class.
+
+  default:              True
+  manual:               False
+
 flag with-data-default
   description:
     Provide instances for Default type class. Please consider carefully if you
@@ -92,6 +99,11 @@ library
     , mmorph ==1.*
     , number-length
     , tagged
+
+  if flag(with-contravariant)
+    build-depends:      contravariant >=0.5 && <2
+    -- ^ Version 0.5 is the first one that defines (>$) method.
+    cpp-options:        -DWITH_contravariant
 
   if flag(with-data-default)
     build-depends:      data-default-class ==0.*

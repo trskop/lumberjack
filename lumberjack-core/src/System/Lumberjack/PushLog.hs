@@ -43,6 +43,10 @@ import System.IO (IO)
 import Data.Default.Class (Default(def))
 #endif
 
+#ifdef WITH_contravariant
+import Data.Functor.Contravariant (Contravariant((>$), contramap))
+#endif
+
 import System.Lumberjack.Backend (LoggingBackend, pushLogStr)
 import Data.LogStr (LogStrArgs(Result, logStrArgs), LogStr)
 
@@ -85,6 +89,13 @@ instance Monoid (PushLog a) where
 #ifndef SEMIGROUP_MONOID
     mappend = (<>)
     {-# INLINE mappend #-}
+#endif
+
+#ifdef WITH_contravariant
+instance Contravariant PushLog where
+    contramap f (PushLog g) = PushLog (g . f)
+
+    a >$ PushLog f = PushLog (const (f a))
 #endif
 
 -- | Run 'PushLog' using provided logging backend.
