@@ -74,7 +74,6 @@ import Language.Haskell.TH.Syntax
         )
     )
 
-import Data.Default.Class (Default(def))
 import Data.Function.Between.Strict ((~@@^>))
 
 import Data.LogStr (LogStr, ToLogStr(toLogStr), logStr)
@@ -161,19 +160,19 @@ instance Lift str => Lift (Location str) where
 -- 'endLine' = 0
 -- 'endChar' = 0
 -- @
-instance IsString str => Default (Location str) where
-    def = Location
-        { _fileName = unknown
-        , _packageName = unknown
-        , _moduleName = unknown
-        , _startLine = unknownPosition
-        , _startChar = unknownPosition
-        , _endLine = unknownPosition
-        , _endChar = unknownPosition
-        }
-      where
-        unknown = "<unknown>"
-        unknownPosition = 0
+unknownLocation :: IsString str => Location str
+unknownLocation = Location
+    { _fileName = unknown
+    , _packageName = unknown
+    , _moduleName = unknown
+    , _startLine = unknownPosition
+    , _startChar = unknownPosition
+    , _endLine = unknownPosition
+    , _endChar = unknownPosition
+    }
+  where
+    unknown = "<unknown>"
+    unknownPosition = 0
 
 -- | Serialized in to: @\<package\>:\<module\> \<file\>:\<line\>:\<char\>@.
 instance (ToLogStr str) => ToLogStr (Location str) where
@@ -189,14 +188,15 @@ instance (ToLogStr str) => ToLogStr (Location str) where
 -- \@(\<package\>:\<module\> \<file\>:\<line\>:\<char\>)
 -- @
 --
--- Same interpretation is used by /monad-logger package/.
+-- Same interpretation is used by /monad-logger package/. When 'Location' value
+-- is the same as 'unknownLocation' then empty 'LogStr' value is returned.
 monadLoggerStyleLocation
     :: (Eq str, IsString str, ToLogStr str)
     => Location str
     -> LogStr
 monadLoggerStyleLocation loc
-  | loc == def = mempty
-  | otherwise  = "@(" <> toLogStr loc <> ")"
+  | loc == unknownLocation = mempty
+  | otherwise              = "@(" <> toLogStr loc <> ")"
 
 -- | Simple location as is in example produced by converting 'Loc' in to
 -- 'Location'. See also 'locationFromLoc'.

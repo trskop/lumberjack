@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE NoImplicitPrelude #-}
@@ -84,7 +85,10 @@ import Data.Typeable (Typeable)
 import Data.Void (Void)
 import System.IO (IO)
 
+#ifdef WITH_data_default_class
 import Data.Default.Class (Default(def))
+#endif
+
 import Data.LogStr (LogStr)
 
 
@@ -153,6 +157,7 @@ noLoggingBackend :: SomeLoggingBackend
 noLoggingBackend = SomeLoggingBackend (error "SomeLoggingBackend Void" :: Void)
 {-# INLINE noLoggingBackend #-}
 
+#ifdef WITH_data_default_class
 -- | Please, use 'noLoggingBackend' instead of 'def' whenever possible.
 -- 'Default' class has no axioms associated with it, which can make code that
 -- uses it hard to reason about.
@@ -163,6 +168,7 @@ noLoggingBackend = SomeLoggingBackend (error "SomeLoggingBackend Void" :: Void)
 instance Default SomeLoggingBackend where
     def = noLoggingBackend
     {-# INLINE def #-}
+#endif
 
 -- | Wrap logging backend in to 'SomeLoggingBackend' for it to be used by
 -- monomorphic function.

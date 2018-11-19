@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -26,12 +27,21 @@ module System.Lumberjack.PushLog
 import Control.Applicative ((*>), pure)
 import Data.Function ((.), ($), const, flip)
 import Data.Typeable (Typeable)
-import Data.Monoid (Monoid(mappend, mempty))
+import Data.Monoid
+    ( Monoid
+        ( mempty
+#ifndef SEMIGROUP_MONOID
+        , mappend
+#endif
+        )
+    )
 import Data.Semigroup (Semigroup((<>)))
 import GHC.Generics (Generic)
 import System.IO (IO)
 
+#ifdef WITH_data_default_class
 import Data.Default.Class (Default(def))
+#endif
 
 import System.Lumberjack.Backend (LoggingBackend, pushLogStr)
 import Data.LogStr (LogStrArgs(Result, logStrArgs), LogStr)
@@ -55,10 +65,12 @@ append (PushLog f) (PushLog g) =
     PushLog $ \a -> f a *> g a
 {-# INLINE append #-}
 
+#ifdef WITH_data_default_class
 -- | Doesn't push a log message in to backend, only returns ().
 instance Default (PushLog a) where
     def = noop
     {-# INLINE def #-}
+#endif
 
 -- | @('<>') = 'append'@
 instance Semigroup (PushLog a) where
@@ -70,8 +82,10 @@ instance Monoid (PushLog a) where
     mempty = noop
     {-# INLINE mempty #-}
 
+#ifndef SEMIGROUP_MONOID
     mappend = (<>)
     {-# INLINE mappend #-}
+#endif
 
 -- | Run 'PushLog' using provided logging backend.
 runPushLog :: LoggingBackend b => b -> PushLog b -> IO ()
