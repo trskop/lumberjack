@@ -16,8 +16,8 @@ ltsVersions :: [(Word, Word)]
 ltsVersions =
     [ ( 9, 21) -- Final LTS 9 version
     , (10, 10) -- Final LTS 10 version
-    , (11, 19)
-    , (12, 4)
+    , (11, 22) -- Final LTS 11 version
+    , (12, 19)
     ]
 
 stackYamlTemplate :: FilePath

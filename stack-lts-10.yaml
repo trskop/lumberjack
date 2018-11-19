@@ -16,4 +16,5 @@ extra-deps:
 flags:
   log-level: {pedantic: True}
   lumberjack-core: {pedantic: True, with-mtl: True, with-exceptions: True}
+  lumberjack-fast-logger: {pedantic: True}
   logstr: {pedantic: True}
