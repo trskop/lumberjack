@@ -38,30 +38,35 @@ import Data.LogStr (LogStrArgs(Result, logStrArgs), LogStr)
 
 
 -- | Represents closure of a function like 'pushLogStr' or 'pushLogStrLn', with
--- already bounded 'LogStr' argument.
-newtype PushLog b = PushLog (b -> IO ())
+-- already bounded either 'LogStr' or 'LoggingBackend' argument.
+newtype PushLog a = PushLog (a -> IO ())
   deriving (Generic, Typeable)
 
--- | Doesn't push a log message in to backend, only returns '()'.
-noop :: PushLog b
+-- | Doesn't push a log message in to backend, only returns '()'.  Behaves as
+-- an identity for 'append' operation.
+noop :: PushLog a
 noop = PushLog . const $ pure ()
 {-# INLINE noop #-}
 
-append :: PushLog b -> PushLog b -> PushLog b
+-- | Sequence two log messages one after another.  This operation has an
+-- identity 'noop'.
+append :: PushLog a -> PushLog a -> PushLog a
 append (PushLog f) (PushLog g) =
-    PushLog $ \backend -> f backend *> g backend
+    PushLog $ \a -> f a *> g a
 {-# INLINE append #-}
 
 -- | Doesn't push a log message in to backend, only returns ().
-instance Default (PushLog b) where
+instance Default (PushLog a) where
     def = noop
     {-# INLINE def #-}
 
-instance Semigroup (PushLog b) where
+-- | @('<>') = 'append'@
+instance Semigroup (PushLog a) where
     (<>) = append
     {-# INLINE (<>) #-}
 
-instance Monoid (PushLog b) where
+-- | @'mempty' = 'noop'@
+instance Monoid (PushLog a) where
     mempty = noop
     {-# INLINE mempty #-}
 

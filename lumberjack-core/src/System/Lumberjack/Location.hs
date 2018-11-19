@@ -8,16 +8,14 @@
 {-# LANGUAGE TemplateHaskell #-}
 -- |
 -- Module:       $HEADER$
--- Description:  TODO
+-- Description:  Representation of location in a Haskell source file.
 -- Copyright:    (c) 2015-2016, Peter Trško
 -- License:      BSD3
 --
 -- Stability:    experimental
--- Portability:  CPP, DeriveDataTypeable, DeriveFunctor, DeriveGeneric,
---               NoImplicitPrelude, OverloadedStrings, RecordWildCards,
---               TemplateHaskell
+-- Portability:  GHC specific language extensions.
 --
--- TODO
+-- Representation of location in a Haskell source file.
 module System.Lumberjack.Location
   where
 

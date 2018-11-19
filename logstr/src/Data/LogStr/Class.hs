@@ -225,6 +225,7 @@ instance ToLogStr TypeRep where
 
 -- {{{ Case Insensitive -------------------------------------------------------
 
+-- | Same as @'toLogStr' . 'CI.original'@.
 instance (ToLogStr a) => ToLogStr (CI a) where
     toLogStr = toLogStr . CI.original
 

@@ -94,10 +94,10 @@ class LoggingBackend b where
     -- | If backend is using files\/network to store\/send log messages, then
     -- by calling this function it should reopen file or network connection.
     --
-    -- When log files being rotated it is necessary to reopen it to finalize
-    -- the swap of new and old log file. Similarly after detecting network
-    -- issues and/or changing configuration at run-time, backend needs to
-    -- create new network connection and deallocate the old one.
+    -- When log files are being rotated it is necessary to reopen it to
+    -- finalize the swap of new and old log file. Similarly after detecting
+    -- network issues and/or changing configuration at run-time, backend needs
+    -- to create new network connection and deallocate the old one.
     reload :: b -> IO ()
 
     -- | Writing a log message using the specified logging backend.
@@ -305,7 +305,7 @@ asSomeLoggingBackendM f = (>>= asSomeLoggingBackend f)
 -- module Main (main)
 --   where
 --
--- import Control.Monad.Logger (LoggingT, pushLogLn, runLoggingT)
+-- import Control.Monad.Logger (LoggingT, pushLogStr, runLoggingT)
 -- import Data.Default.Class (Default(def))
 --     -- <https://hackage.haskell.org/package/data-default-class>
 -- import System.Lumberjack.Backend ('withSomeLoggingBackendM')
@@ -315,7 +315,7 @@ asSomeLoggingBackendM f = (>>= asSomeLoggingBackend f)
 -- doSomething :: LoggingT IO ()
 -- doSomething = do
 --     -- -->8--
---     pushLogLn \"Some log message.\"
+--     pushLogStr \"Some log message.\"
 --     -- -->8--
 --     pure ()
 --
